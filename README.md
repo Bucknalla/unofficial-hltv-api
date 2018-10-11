@@ -271,9 +271,55 @@ Responce
 
 `[{'date': 'DD/MM/YY', 'event': 'EVENT_TITLE', 'opponent': 'OPPONENT_NAME', 'map': 'MAP_FULL_NAME', 'score': 'SCORE', 'result': 'W/D/L'}, This goes on for 5 times per the request]`
 
+---
+
 ### Team Ranking
 
+Very simply returns the teams global ranking as of the time of the request, aquired from the latest possible hltv rankings.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.teams.ranking(hltvTeamId)`
+
+Response
+
+`{'ranking': 'TEAM_RANKING'}`
+
+---
+
 ### Big Achivements
+
+This shows all HLTV listed big achivements for a team, which is normally the event and their ranking, this is returned as a list.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.teams.bigAchivements(hltvTeamId)`
+
+Response
+
+`[{'event': ' EVENT_NAME', 'ranking': 'RANKING'}, And So On]`
+
+---
 
 ## Player
 
