@@ -37,7 +37,7 @@ Complex Data:
 - Default is Disabled
 - Boolean variable to enable complex data
 
-#### Request Format 1
+#### Request Format 1 of 2
 
 Request
 
@@ -47,7 +47,7 @@ Responce
 
 `{'roster': ['examplePlayer0', 'examplePlayer1', 'examplePlayer2', 'examplePlayer3', 'examplePlayer4']}`
 
-#### Request Format 2
+#### Request Format 2 of 2
 
 Request
 
@@ -115,6 +115,28 @@ Responce
 ------
 
 ### Short Stats
+
+Basic data, contains short but important information about the requested team, such as world ranking, weeks in the top 30 core, location and roster.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.teams.shortStats(hltvTeamId)`
+
+Responce
+
+`{'ranking': 'RANKING', 'weeks_in_top_30': 'WEEKS_IN_TOP_30', 'location': 'LOCATION_COUNTRY', 'roster': ['PLAYER', 'PLAYER', 'PLAYER', 'PLAYER', 'PLAYER']}`
+
+----
 
 ### Long Stats
 
