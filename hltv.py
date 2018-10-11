@@ -156,8 +156,6 @@ class teams:
 		# Ranking || Weeks in Top 30 || Location || Basic Roster
 		data = {
 			"ranking": teams.ranking(teamRequest)["ranking"],
-			"weeks_in_top_30": 0,
-			"location": 0,
 			"roster": teams.roster(teamRequest, False)["roster"]
 		}
 
@@ -174,40 +172,7 @@ class teams:
 		rosterStats = teams.roster(teamRequest, True)
 		bsData0 = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
 
-		data = {
-			"ranking": shortStatsInc["ranking"],
-			"weeks_in_top_30": shortStatsInc["weeks_in_top_30"],
-			"location": shortStatsInc["location"],
-			"roster": teams.roster(teamRequest, False)["roster"],
-			"upcoming_matches": teams.upcomingMatches(teamRequest),
-			"recent_matches": teams.recentResults(teamRequest),
-			"peak": bsData0.findAll("span", {"class": "value"})[1].text[1:],
-			"weeks_at_peak": bsData0.findAll("span", {"class": "value"})[2].text[:-5],
-			"maps_played": rosterStats["maps_played"],
-			"wdl": {
-				"wins": rosterStats["wdl"]["win"],
-				"draws": rosterStats["wdl"]["draw"],
-				"loss": rosterStats["wdl"]["loss"]
-			},
-			"total_kills": rosterStats["total_kills"],
-			"total_deaths": rosterStats["total_deaths"],
-			"maps": {
-				"train": mapData["train"],
-				"overpass": mapData["overpass"],
-				"mirage": mapData["mirage"],
-				"season": mapData["season"],
-				"dust2": mapData["dust2"],
-				"inferno": mapData["inferno"],
-				"cobblestone": mapData["cobblestone"],
-				"nuke": mapData["nuke"],
-				"cache": mapData["cache"]
-			}
-		}
-
-		#webReq = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
-
-		# All Short || Upcoming & Recent Matches || Time @ Peak & Peak || Maps Played || W/D/L || Total Kills etc. /stats/ || Map Win Percentages
-		return data
+		return {"ranking": shortStatsInc["ranking"], "weeks_in_top_30": shortStatsInc["weeks_in_top_30"], "location": shortStatsInc["location"], "roster": teams.roster(teamRequest, False)["roster"], "upcoming_matches": teams.upcomingMatches(teamRequest), "recent_matches": teams.recentResults(teamRequest), "peak": bsData0.findAll("span", {"class": "value"})[1].text[1:], "weeks_at_peak": bsData0.findAll("span", {"class": "value"})[2].text[:-5], "maps_played": rosterStats["maps_played"], "wdl": { "wins": rosterStats["wdl"]["win"], "draws": rosterStats["wdl"]["draw"], "loss": rosterStats["wdl"]["loss"]}, "total_kills": rosterStats["total_kills"], "total_deaths": rosterStats["total_deaths"], "maps": {"train": mapData["train"], "overpass": mapData["overpass"], "mirage": mapData["mirage"], "season": mapData["season"], "dust2": mapData["dust2"], "inferno": mapData["inferno"], "cobblestone": mapData["cobblestone"], "nuke": mapData["nuke"], "cache": mapData["cache"]}}
 
 	def upcomingMatches(teamRequest):
 		# Upcoming Matches Only
