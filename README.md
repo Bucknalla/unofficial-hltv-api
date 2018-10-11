@@ -235,6 +235,42 @@ Response
 
 ### Match History
 
+This can return the complete match history of a team, this process can return an extremly large amount of data, hence an additional parameter is given to limit the size of the response, by default however it is disabled.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+Reponse Limit:
+- Not Required
+- Given Second
+- Default is None / Disabled
+- Int variable used to limit size of response
+
+#### Request Format 1 of 2
+
+Request
+
+`hltv.teams.matchHistory(HltvTeamId)`
+
+Responce
+
+`[{'date': 'DD/MM/YY', 'event': 'EVENT_TITLE', 'opponent': 'OPPONENT_NAME', 'map': 'MAP_FULL_NAME', 'score': 'SCORE', 'result': 'W/D/L'}, This goes on for a while, depends age of team of course]`
+
+#### Request Format 1 of 2
+
+Request
+
+`hltv.teams.matchHistory(HltvTeamId, 5)`
+
+Responce
+
+`[{'date': 'DD/MM/YY', 'event': 'EVENT_TITLE', 'opponent': 'OPPONENT_NAME', 'map': 'MAP_FULL_NAME', 'score': 'SCORE', 'result': 'W/D/L'}, This goes on for 5 times per the request]`
+
 ### Team Ranking
 
 ### Big Achivements
