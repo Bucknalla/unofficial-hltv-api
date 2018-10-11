@@ -323,7 +323,31 @@ Response
 
 ## Player
 
+This section will contain all stats related to individual stats and performances of a requested player, such as their general information, simple statistics, clutches, weapon usage, performance against different opposition and personal achivements such as event MVPs.
+
 ### Player Profile
+
+This contains all short stats about a player from their profile, such as country, real name, team and times in the hltv top 20 rankings.
+
+#### Parameters
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.player.profile(hltvPlayerId)`
+
+Response
+
+`{'alias': 'ALIAS', 'real_name': ' 'REAL_NAME', 'hltv_id': 'HLTV_ID', 'country': 'COUNTRY', 'profile_picture': 'HTTP://IMAGE.JPG', 'age': 'AGE_YEARS', 'current_team': 'CURRENT_TEAM', 'top_20': [{'year': 'YEAR', 'ranking': 'RANKING'}], 'achivements': ['EVENT_NAME_ACHIVEMENT_DETAILS_HERE']}`
+
+---
 
 ### Stats
 
