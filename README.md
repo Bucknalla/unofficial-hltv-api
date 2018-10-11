@@ -325,6 +325,8 @@ Response
 
 This section will contain all stats related to individual stats and performances of a requested player, such as their general information, simple statistics, clutches, weapon usage, performance against different opposition and personal achivements such as event MVPs.
 
+---
+
 ### Player Profile
 
 This contains all short stats about a player from their profile, such as country, real name, team and times in the hltv top 20 rankings.
@@ -350,6 +352,90 @@ Response
 ---
 
 ### Stats
+
+All of a players careers stats over a time period or all time, can be modified on request with a lot of options for different analysis.
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+Use Complex Stas:
+- Not Required, Unless Using Filter Match, Time Filter or Ranking Filter
+- Second
+- Default is False
+- Boolean, determins to return complex stats or not
+
+Filter Match:
+- Not Required
+- Third
+- Default is None
+- String determins what to select matches by, options are 'Lan', 'Online', 'BigEvents', 'Majors'
+
+Time Filter:
+- Not Required
+- Fourth
+- Default is None
+- String determines the time period to sort by, give a start date and a end date in a array
+
+Ranking Filter:
+- Not Required
+- Fifth
+- Default is None
+- Determines the ranking of opposition
+
+#### Request Format 1 of 5
+
+Request
+
+`hltv.player.stats(hltvPlayerId)`
+
+Response
+
+`{'rating_2': '0.99', 'kills_per_round': '0.63', 'headshot': '48.0', 'maps_played': '34', 'deaths_per_round': '0.66', 'rounds_contributed': '71.5'}`
+
+#### Request Format 2 of 5
+
+Request
+
+`hltv.player.stats(hltvPlayerId, True)`
+
+Response
+
+`{'kills_per_round': 'KPR', 'headshot': 'HS%', 'deaths_per_round': 'DPR', 'total_kills': 'TOTAL_KILLS', 'total_deaths': 'TOTAL_DEATHS', 'kdr': 'KDR', 'adr': 'ADR', 'grenade_adr': 'NADE_ADR', 'rounds_played': 'ROUNDS_TOTAL', 'assists_per_round': 'APR', 'deaths_round': 'DPR', 'saved_by_teammate_per_round': 'SBTPR', 'saved_teammates_per_round': 'STPR', 'rating_1': 'RATING_1'}`
+
+#### Request Format 3 of 5
+
+Request
+
+`hltv.player.stats(hltvPlayerId, True, Filter)`
+
+Response
+
+`{'kills_per_round': 'KPR', 'headshot': 'HS%', 'deaths_per_round': 'DPR', 'total_kills': 'TOTAL_KILLS', 'total_deaths': 'TOTAL_DEATHS', 'kdr': 'KDR', 'adr': 'ADR', 'grenade_adr': 'NADE_ADR', 'rounds_played': 'ROUNDS_TOTAL', 'assists_per_round': 'APR', 'deaths_round': 'DPR', 'saved_by_teammate_per_round': 'SBTPR', 'saved_teammates_per_round': 'STPR', 'rating_1': 'RATING_1'}`
+
+#### Request Format 4 of 5
+
+
+Request
+
+`hltv.player.stats(hltvPlayerId, True, Filter, [Dates])`
+
+Response
+
+`{'kills_per_round': 'KPR', 'headshot': 'HS%', 'deaths_per_round': 'DPR', 'total_kills': 'TOTAL_KILLS', 'total_deaths': 'TOTAL_DEATHS', 'kdr': 'KDR', 'adr': 'ADR', 'grenade_adr': 'NADE_ADR', 'rounds_played': 'ROUNDS_TOTAL', 'assists_per_round': 'APR', 'deaths_round': 'DPR', 'saved_by_teammate_per_round': 'SBTPR', 'saved_teammates_per_round': 'STPR', 'rating_1': 'RATING_1'}`
+
+#### Request Format 5 of 5
+
+
+Request
+
+`hltv.player.stats(hltvPlayerId, True, Filter, [Date], Ranking)`
+
+Response
+
+`{'kills_per_round': 'KPR', 'headshot': 'HS%', 'deaths_per_round': 'DPR', 'total_kills': 'TOTAL_KILLS', 'total_deaths': 'TOTAL_DEATHS', 'kdr': 'KDR', 'adr': 'ADR', 'grenade_adr': 'NADE_ADR', 'rounds_played': 'ROUNDS_TOTAL', 'assists_per_round': 'APR', 'deaths_round': 'DPR', 'saved_by_teammate_per_round': 'SBTPR', 'saved_teammates_per_round': 'STPR', 'rating_1': 'RATING_1'}`
 
 ### Clutches
 
