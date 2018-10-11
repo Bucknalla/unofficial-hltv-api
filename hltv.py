@@ -54,66 +54,10 @@ class teams:
 		teamId = getId(teamRequest)
 		
 		if (complex):
-			data = {
-				"roster": {
-					"player0": {
-						"alias": "",
-						"country": "",
-						"id": "",
-						"maps_played": "",
-						"picture": "",
-						"real_name": ""
-					},
-					"player1": {
-						"alias": "",
-						"country": "",
-						"id": "",
-						"maps_played": "",
-						"picture": "",
-						"real_name": ""
-					}
-					,
-					"player2": {
-						"alias": "",
-						"country": "",
-						"id": "",
-						"maps_played": "",
-						"picture": "",
-						"real_name": ""
-					},
-					"player3": {
-						"alias": "",
-						"country": "",
-						"id": "",
-						"maps_played": "",
-						"picture": "",
-						"real_name": ""
-					},
-					"player4": {
-						"alias": "",
-						"country": "",
-						"id": "",
-						"maps_played": "",
-						"picture": "",
-						"real_name": ""
-					}
-				},
-				"maps_played": 0,
-				"wdl": {
-					"win": 0,
-					"draw": 0,
-					"loss": 0
-				},
-				"total_kills": 0,
-				"total_deaths": 0,
-				"rounds_played": 0,
-				"kdr": 0
-			}
+			data = {"roster": {"player0": {},"player1": {},"player2": {},"player3": {},"player4": {}},"wdl": {}}
 
 			# Have to find the player IDs before this can be used
-			playerIds = []
-			for i in webWorker("https://www.hltv.org/team/" + teamId + "/bot").find("div", {"class": "bodyshot-team"}).findAll("a"):
-				playerIds.append(i.get("href").split("/")[2])
+			playerIds = [i.get("href").split("/")[2] for i in webWorker("https://www.hltv.org/team/" + teamId + "/bot").find("div", {"class": "bodyshot-team"}).findAll("a")]
 
 			bsData = webWorker("https://www.hltv.org/stats/lineup?lineup=" + playerIds[0] + "&lineup=" + playerIds[1] + "&lineup=" + playerIds[2] + "&lineup=" + playerIds[3] + "&lineup=" + playerIds[4] + "&minLineupMatch=5")
 			bsData0 = bsData.findAll("div", {"class": "teammate-info standard-box"})
@@ -154,15 +98,9 @@ class teams:
 
 	def shortStats(teamRequest):
 		# Ranking || Weeks in Top 30 || Location || Basic Roster
-		data = {
-			"ranking": teams.ranking(teamRequest)["ranking"],
-			"roster": teams.roster(teamRequest, False)["roster"]
-		}
-
-		bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
-		data["weeks_in_top_30"] = bsData.findAll("div", {"class": "profile-team-stat"})[1].text[23:]
+		data = {"ranking": teams.ranking(teamRequest)["ranking"],"roster": teams.roster(teamRequest, False)["roster"]}
+		data["weeks_in_top_30"] = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "profile-team-stat"})[1].text[23:]
 		data["location"] = bsData.findAll("div", {"class": "team-country"})[0].text[1:]
-
 		return data
 
 	def longStats(teamRequest):
@@ -225,7 +163,7 @@ class teams:
 
 	ranking = lambda teamRequest: {"ranking": str(webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll('div', {"class": "profile-team-stat"})[0].find("a").text[-1:])} # Finds relevant data
 
-	bigAchivements = lambda teamRequest: [{"event": achivement.text.split("at")[1], "ranking": achivement.text.split("at")[0]} for achivement in webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "cell text-ellipsis achievement "})]
+	bigAchivements = lambda teamRequest: [{"event": achivement.text.split("at")[1], "ranking": achivement.text.split("at")[0][:-1]} for achivement in webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "cell text-ellipsis achievement "})]
 
 class player:
 
@@ -397,7 +335,6 @@ class match:
 		bsData = webWorker(matchIdResolver(matchID)) # Cannot compress further without sending multiple requests
 		return {"winner_score": bsData.find("div", {"class": "won"}).text, "loser_score": bsData.find("div", {"class": "lost"}).text}
 
-	# Get Rewatch Links
 	def rewatch(matchID):
 		
 		bsData, data = webWorker(matchIdResolver(matchID)).findAll("div", {"class": "stream-box"}), {}
@@ -409,7 +346,6 @@ class match:
 		data["watch"] = [{"link": i.get("data-stream-embed"), "broadcast_title": i.find("span", {"class": "spoiler"}).text, "broadcast_country": i.find("img", {"class": "stream-flag flag"}).get("alt")} for i in bsData]
 		return data
 
-	# Gets All Veto Data
 	def veto(matchID, keepLineBreaks=False):
 		
 		bsData = webWorker(matchIdResolver(matchID)) # Cannot be removed without sending 2x requests
@@ -419,7 +355,6 @@ class match:
 		else:
 			return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text.replace('\n',' '), "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text.replace('\n',' ')}
 
-	# All player scores in a match
 	def playerScores(matchID):
 		# Declare All Initial Arrays
 		references, referenceKeys = ["collective"] + ["map_" + str(i) for i in range(9)], [["players", "players"], ["kd", "kd text-center"], ["adr", "adr text-center "], ["kast", "kast text-center"], ["rating", "rating text-center"]]
@@ -468,8 +403,8 @@ class match:
 
 		return data
 	
-	# Gets players -> Removes Garbadge Text -> Adds to Dictionary
 	players = lambda matchID: {"players": [(''.join(i)) for i in list(filter(None, [list(filter(None, i.text.split("\n"))) for i in webWorker(matchIdResolver(matchID)).findAll("td", {"class": "player"})]))]}
 
-	# Gets Maps For Match
 	maps = lambda matchID: [i.text for i in webWorker(matchIdResolver(matchID)).findAll("div", {"class": "mapname"})]
+
+print(teams.roster("4608", True))
