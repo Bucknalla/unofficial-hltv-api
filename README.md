@@ -212,6 +212,27 @@ Response
 
 ### Map Data
 
+This will simply return each map in the mappool & maps the team has played before and give their win percentage on them, this can be useful to see how good a team is on a map or make prediction etc.
+At the moment it supports no time period however in future it may.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+` hltv.teams.mapData(hltvTeamId)`
+
+Response
+`{'train': 'TRAIN_WIN_PERCENT', 'overpass': 'OVERPASS_WIN_PERCENT', 'mirage': 'MIRAGE_WIN_PERCENT', 'season': 'SEASON_WIN_PERCENT', 'dust2': 'D2_WIN_PERCENT', 'inferno': 'INFERNO_WIN_PERCENT', 'cobblestone': 'CBBL_WIN_PERCENT', 'nuke': 'NUKE_WIN_PERCENT', 'cache': 'CACHE_WIN_PERCENT'}`
+
+---
+
 ### Match History
 
 ### Team Ranking
