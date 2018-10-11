@@ -160,9 +160,55 @@ Responce
 
 `{'ranking': 'RANKING', 'weeks_in_top_30': 'WEEKS_IN_TOP_30', 'location': 'LOCATION_COUNTRY', 'roster': ['PLAYER', 'PLAYER', 'PLAYER', 'PLAYER', 'PLAYER'], 'upcoming_matches': [{'date': 'DD/MM', 'match': 'MATCH_TITLE', 'tournament': 'TOURNAMENT_NAME'}, MORE_HERE], 'recent_matches': [{'score': 'SCORE', 'match': 'MATCH TITLE', 'tournament': 'TOURNAMENT', 'status': 'W/D/L'}, MORE_HERE], 'peak': 'WORLD_RANKING_PEAK', 'weeks_at_peak': 'WEEKS_AT_PEAK', 'maps_played': 'MAPS_WITH_ROSTER', 'wdl': {'wins': 'WINS', 'draws': 'DRAWS', 'loss': 'LOSSES'}, 'total_kills': 'COLLECTIVE_KILLS', 'total_deaths': 'COLLECTIVE_DEATHS', 'maps': {'train': 'TRAIN_WIN_RATE', 'overpass': 'OVERPASS_WIN_RATE', 'mirage': 'MIRAGE_WIN_RATE', 'season': 'SEASON_WIN_RATE', 'dust2': 'DUST2_WIN_RATE', 'inferno': 'INFERNO_WIN_RATE', 'cobblestone': 'CBBL_WIN_RATE', 'nuke': 'NUKE_WIN_RATE', 'cache': 'CACHE_WIN_RATE'}}`
 
+---
+
 ### Upcoming Matches
 
+Returns an array with all upcoming matches listed on the team page of hltv.org from the requested team.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.teams.upcomingMatches(hltvTeamId)`
+
+Response
+
+`[{'date': 'DD/MM', 'match': 'MATCH_OFFICIAL_TITLE', 'tournament': 'TOURNAMENT_NAME'}, MORE_HERE]`
+
+---
+
 ### Recent Results
+
+Similar to Upcoming matches, however returns matches that the team has recently played, full match history is available on team ranking, however this is generally quicker to call if you only want a few recent matches.
+
+#### Parameters
+
+Team Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Team ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.teams.recentResults(hltvTeamId)`
+
+Response
+
+`[{'score': 'FINAL_SCORE', 'match': 'MATCH_TITLE', 'tournament': 'TOURNAMENT_NAME', 'status': 'W/D/L'}, MORE_HERE]`
+
+---
 
 ### Map Data
 
