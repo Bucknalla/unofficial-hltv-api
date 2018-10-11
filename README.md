@@ -437,7 +437,59 @@ Response
 
 `{'kills_per_round': 'KPR', 'headshot': 'HS%', 'deaths_per_round': 'DPR', 'total_kills': 'TOTAL_KILLS', 'total_deaths': 'TOTAL_DEATHS', 'kdr': 'KDR', 'adr': 'ADR', 'grenade_adr': 'NADE_ADR', 'rounds_played': 'ROUNDS_TOTAL', 'assists_per_round': 'APR', 'deaths_round': 'DPR', 'saved_by_teammate_per_round': 'SBTPR', 'saved_teammates_per_round': 'STPR', 'rating_1': 'RATING_1'}`
 
+---
+
 ### Clutches
+
+Stats about a players clutching ability, such as win ratio in 1v1s, total differences, details on successful large clutches.
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+Get Stats:
+- Required if nothing else besides player ID
+- Given Second
+- False by Default
+- Boolean value to see if the user wants stats detailed
+
+Clutch Type:
+- Required if nothing else besides player ID
+- Given Third
+- Default of 1v1
+- can be set as a string number from 1v1 to 1v5
+
+Get Details:
+- Required if nothing else besides player ID
+- Given Fourth
+- Default of False
+- Boolean, True or False to determine if details are desired
+
+Details Limit: 
+- Not Required
+- Given Fifth
+- Default of None
+- Determins limit of details data to save time
+
+#### Request Format 1 of 5
+
+Request 
+
+`ok`
+
+Response
+
+`ok`
+
+#### Request Format 2 of 5
+
+#### Request Format 3 of 5 
+
+#### Request Format 4 of 5
+
+#### Request Format 5 of 5
 
 ### Individual Stats
 
