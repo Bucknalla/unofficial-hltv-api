@@ -12,6 +12,8 @@ My custom 'API' for hltv.org, allows the module to be imported and used with par
 
 # Documentation
 
+Still a work in progress.
+
 ## Teams
 
 Contains all functions related to team data, an example team page can be found <a href="https://www.hltv.org/team/4608/natus-vincere">here</a>.
