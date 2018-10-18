@@ -913,15 +913,86 @@ Response
 
 ### Events
 
-Events listed on hltv, as active or up and coming.
+Events listed on hltv under event section.
+
+#### Parameters
+
+None
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.hltv.events()`
+
+Response
+
+`[
+    {
+        "dates": "Dates X to Y",
+        "event": "Event Name"
+    },
+    So on,
+ ]`
+
+---
 
 ### Upcoming Matches Today
 
 Matches today that are yet to be played as of the time requesed.
 
+#### Parameters
+
+None
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.hltv.upcomingMatches()`
+
+Response
+
+`[
+    {
+        "event": "Event",
+        "map": "Match Type or Map",
+        "match": "Match Title",
+        "time": "Time"
+    },
+    So on
+]`
+
+---
+
 ### Todays Played Matches Results
 
 Matches today that have already been played listed on the site.
+
+#### Parameters
+
+None
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.hltv.todaysResults()`
+
+Response
+
+`[
+    {
+        "map": "Map full name",
+        "score": "16 - XX",
+        "team_one": "Team",
+        "team_two": "Team",
+        "tournament": "Tournament"
+    },
+    So on
+]`
+
+---
 
 ## Match
 
