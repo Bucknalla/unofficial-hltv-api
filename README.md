@@ -1,5 +1,6 @@
 # Unofficial-HLTV-API
 My custom 'API' for hltv.org, allows the module to be imported and used with parameters to get data from certain aspects of the site.
+This is still a work in progress with a few minor features not included, with bad requests the module will error and these should be caught, it will not raise custom exceptions at the moment partially to keep it compact, as well as complete match stats only works for bo3s and maybe higher at the moment, this will be fixed in a future release.
 
 # Installation & Usage
 <b>Install</b>
@@ -557,6 +558,55 @@ Response
 ---
 
 ### Career Matches
+
+All of a players known matches over their entire career.
+
+
+#### Parameters
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+Match Stats:
+- Not Required
+- Given Second
+- Default of False; disabled
+- Determins whether or not to also include match stats from hltv in the response, Boolean
+
+Limit Response
+- Not Required
+- Given Third
+- Default of None
+- Determins the limit of the amount of matches given, int or None type if disabled.
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.player.matches(hltvPlayerID)`
+
+Response
+
+`[
+    {
+        "date": "DD/MM/YY",
+        "kd": "KILLS - DEATHS",
+        "kd_diff": "DIFFERENCE STARTS WITH +-",
+        "map": "PRETTY NAME OF MAP",
+        "rating": "RATING IF HAS ASTRIX AT END IT'S RATING 1.0 ELSE IT'S NOT",
+        "score": "FINAL SCORE",
+        "team_one": "TEAM ONE",
+        "team_two": "TEAM TWO"
+        },
+        So on
+]`
+
+Request
+
+Response
 
 ### Weapon Usage
 
