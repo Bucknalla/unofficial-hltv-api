@@ -691,6 +691,36 @@ Response
 
 Shows all of a players individual stats versus every team they have played throughout their careers recorded on hltv.
 
+#### Parameters
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.player.opponents(hltvPlayerID)`
+
+Response
+
+`[
+    {
+        "kd_diff": "kd_diff",
+        "kdr": "kdr",
+        "maps_played": "total_maps_played",
+        "opponent": "opponent",
+        "rating_1": "rating one"
+    },
+    So on
+]`
+
+---
+
 ### Achivements
 
 Personal achivements of the player
