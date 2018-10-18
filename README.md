@@ -505,7 +505,56 @@ Response
 
 `{"losses": "LOSSES", "difference": "DIFFERENCE STARTS WITH +-", "wins": "WINS"}`
 
+---
+
 ### Individual Stats
+
+Everything to do with a players individual stats over their respective career.
+
+#### Parameters
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.player.individual(hltvPlayerId)`
+
+Response
+
+`{
+    "0_kill_rounds": "0_KILL_ROUNDS",
+    "1_kill_rounds": "1_KILL_ROUNDS",
+    "2_kill_rounds": "2_KILL_ROUNDS",
+    "3_kill_rounds": "3_KILL_ROUNDS",
+    "4_kill_rounds": "4_KILL_ROUNDS",
+    "5_kill_rounds": "ACES",
+    "deaths": "TOTAL_DEATHS",
+    "first_kill_in_won_rounds": "FIRST_KILL_PERCENT_IN_WON_ROUNDS",
+    "grenade_kills": "HE_NADE_KILLS",
+    "kd_diff": "KD DIFF",
+    "kdr": "KDR",
+    "kills": "TOTAL_KILLS",
+    "kpr": "KILLS_PER_ROUND",
+    "opening_deaths": "TIMES_DIED_FIRST",
+    "opening_kdr": "KDR_IN_OPENINGS",
+    "opening_kill_rating": "OPENING_KILL_RATING",
+    "opening_kills": "OPENING_KILLS",
+    "other_kills": "OTHER_KILLS",
+    "pistol_kills": "PISTOL_KILLS",
+    "rifle_kills": "RIFLE_KILLS",
+    "rounds_with_kills": "ROUNDS_WITH_KILLS",
+    "smg_kills": "SMG_KILLS",
+    "sniper_kills": "SNIPER_KILLS",
+    "team_win_percent_after_first_kill": "TEAM_WIN_PERCENT_AFTER_FIRST_KILL"
+}`
+
+---
 
 ### Career Matches
 
