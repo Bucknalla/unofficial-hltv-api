@@ -614,6 +614,79 @@ Response
 
 Shows usage of a players weapons throughout their career, this is not in percentage but that should be easy enough to calculate for yourself, this returns the total kills with each weapon.
 
+#### Parameters
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.player.weapons(hltvPlayerID)`
+
+Response
+
+`{
+    "AK47": "KILLS",
+    "AUG": "KILLS",
+    "AWP": "KILLS",
+    "Bayonet": "KILLS",
+    "Bowie Knife": "KILLS",
+    "Butterfly Knife": "KILLS",
+    "CZ-75 Auto": "KILLS",
+    "Default Knife": "KILLS",
+    "Desert Eagle": "KILLS",
+    "Dual Barettas": "KILLS",
+    "FAMAS": "KILLS",
+    "Falchion Knife": "KILLS",
+    "Five-Seven": "KILLS",
+    "Flip Knife": "KILLS",
+    "G3SG1": "KILLS",
+    "Galil": "KILLS",
+    "Galil-AR": "KILLS",
+    "Glock-18": "KILLS",
+    "Gut Knife": "KILLS",
+    "HE Grenade": "KILLS",
+    "Huntsman Knife": "KILLS",
+    "Karambit": "KILLS",
+    "Knife": "KILLS",
+    "M4A1-S": "KILLS",
+    "M4A4": "KILLS",
+    "M9 Bayonet": "KILLS",
+    "MAC-10": "KILLS",
+    "MAG7": "KILLS",
+    "MP5-SD": "KILLS",
+    "MP7": "KILLS",
+    "MP9": "KILLS",
+    "Molotov": "KILLS",
+    "Negev": "KILLS",
+    "Nova": "KILLS",
+    "P-90": "KILLS",
+    "P2000": "KILLS",
+    "P250": "KILLS",
+    "PP-Bizon": "KILLS",
+    "R8 Revolver": "KILLS",
+    "SCAR-20": "KILLS",
+    "SG-553": "KILLS",
+    "SSG-08": "KILLS",
+    "Sawed Off": "KILLS",
+    "Shadow Daggers": "KILLS",
+    "Suicide": "KILLS",
+    "Tec-9": "KILLS",
+    "UMP-45": "KILLS",
+    "USP-S": "893",
+    "USP-S (Unsilenced)": "KILLS",
+    "XM1014": "KILLS",
+    "Zeus X27": "KILLS"
+}
+`
+
+---
+
 ### Opponents
 
 Shows all of a players individual stats versus every team they have played throughout their careers recorded on hltv.
