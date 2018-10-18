@@ -2,6 +2,10 @@
 My custom 'API' for hltv.org, allows the module to be imported and used with parameters to get data from certain aspects of the site.
 This is still a work in progress with a few minor features not included, with bad requests the module will error and these should be caught, it will not raise custom exceptions at the moment partially to keep it compact, as well as complete match stats only works for bo3s and maybe higher at the moment, this will be fixed in a future release.
 
+# Todo
+- Option to have percentage breakdowns on player weapon usage.
+- Fix player stats for a post match threads.
+
 # Installation & Usage
 <b>Install</b>
 
