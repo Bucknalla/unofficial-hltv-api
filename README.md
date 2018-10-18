@@ -699,7 +699,6 @@ Player Requested:
 - No Default
 - HLTV Player ID Request, Integer given as string
 
-
 #### Request Format 1 of 1
 
 Request
@@ -725,6 +724,24 @@ Response
 
 Personal achivements of the player
 
+#### Parameters
+
+Player Requested:
+- Required
+- Giving First
+- No Default
+- HLTV Player ID Request, Integer given as string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.player.achivements(hltvPlayerID)`
+
+Response
+
+`["MVP At X", "#1 2018", etc.]`
+
 ## Hltv
 
 All functions related exclusively to the hltv site, such as rankings custom site search, events, professional matches today and the results of matches played today.
@@ -732,6 +749,107 @@ All functions related exclusively to the hltv site, such as rankings custom site
 ### Global Rankings
 
 Global ranking top 30.
+
+#### Parameters
+
+Search Specific:
+- Not Required
+- Given First
+- Default of None
+- Get stats on the Xth best team in the world, given int, default of None type.
+
+Custom Year
+- Not Required
+- Given Second
+- Default of the current year
+- Request rankings as of a custom year, not calculated on every day so sometimes may cause error
+
+Custom Month
+- Not Required
+- Given Third
+- Default of the current month
+- Ranking request as of a specific month, given as string, not claculated everyday sometimes may cause error
+
+Custom Day
+- Not Required
+- Given Fourth
+- Default of current day
+- Request ranking of a custom day, not calculated every day, may cause error
+
+#### Request Format 1 of 3
+
+Request
+
+`hltv.hltv.rankings()`
+
+Response
+
+It should be noted in this format, the response in an array and returns teams with ranking in order.
+
+`[
+    {
+        "points": "Total Points",
+        "ranking": "World Ranking",
+        "recent_change": "Change + or - or - for neutral",
+        "roster": [
+            "player",
+            "player",
+            "player",
+            "player",
+            "player"
+        ],
+        "team": "Team Name"
+    },
+    So on
+]`
+
+#### Request Format 2 of 3
+
+Request
+
+`hltv.hltv.rankings(1)`
+
+Response
+
+
+`{
+    "points": "Total Points",
+    "ranking": "World Ranking",
+    "recent_change": "Change + or - or - for neutral",
+    "roster": [
+        "player",
+        "player",
+        "player",
+        "player",
+        "player"
+    ],
+    "team": "Team Name"
+}`
+
+#### Requset Format 3 of 3
+
+Request
+
+`hltv.hltv.rankings(1, "year", "month", "day")`
+
+Result
+
+`[
+    {
+        "points": "Total Points",
+        "ranking": "World Ranking",
+        "recent_change": "Change + or - or - for neutral",
+        "roster": [
+            "player",
+            "player",
+            "player",
+            "player",
+            "player"
+        ],
+        "team": "Team Name"
+    },
+    So on
+]`
 
 ### Query
 
