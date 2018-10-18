@@ -1063,6 +1063,36 @@ Response
 
 Contains all veto data given, can be kept with line breaks or not, if requested.
 
+#### Parameters
+
+Match ID:
+- Required
+- Giving First
+- No Default
+- HLTV Match ID, given as int in form of string
+
+Keep Linebreaks:
+- Not Required
+- Given Second
+- Default of False
+- Boolean value to determine whether to keep the line breaks
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.match.veto(matchId)`
+
+Response
+
+`{
+    "veto": "1. X pick Y and so on",
+    "veto_details": "Additional Details"
+}
+`
+
+---
+
 ### Player Scores
 
 All players information, scores and rating, at the moment will contain collective data and that of each map.
