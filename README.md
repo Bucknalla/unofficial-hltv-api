@@ -604,38 +604,68 @@ Response
         So on
 ]`
 
-Request
-
-Response
+---
 
 ### Weapon Usage
 
+Shows usage of a players weapons throughout their career, this is not in percentage but that should be easy enough to calculate for yourself, this returns the total kills with each weapon.
+
 ### Opponents
+
+Shows all of a players individual stats versus every team they have played throughout their careers recorded on hltv.
 
 ### Achivements
 
+Personal achivements of the player
+
 ## Hltv
+
+All functions related exclusively to the hltv site, such as rankings custom site search, events, professional matches today and the results of matches played today.
 
 ### Global Rankings
 
+Global ranking top 30.
+
 ### Query
+
+The site has a custom search function, this will return everything related to the query and classify results.
 
 ### Events
 
+Events listed on hltv, as active or up and coming.
+
 ### Upcoming Matches Today
+
+Matches today that are yet to be played as of the time requesed.
 
 ### Todays Played Matches Results
 
+Matches today that have already been played listed on the site.
+
 ## Match
+
+Contains all functions related to scraping post match thread, such as final scores maps, vetoes, player scores and the roster of the two teams.
 
 ### Score
 
+Final score, normal 16 - X in a bo1 or 2 - X in a bo3 for example.
+
 ### Rewatch
+
+All rewatch links including GOTV and twitch if given and the nationality of those broadcasts, if it does not contain the GOTV or stream download it should not have it, to download the GOTV demo use the ID in the format: https://www.hltv.org/download/demo/DEMO_ID_HERE
 
 ### Veto
 
+Contains all veto data given, can be kept with line breaks or not, if requested.
+
 ### Player Scores
+
+All players information, scores and rating, at the moment will contain collective data and that of each map.
 
 ### Players in Match
 
+List of all players participating in the match.
+
 ### Maps
+
+All maps that have been played.
