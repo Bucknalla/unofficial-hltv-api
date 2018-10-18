@@ -1097,6 +1097,69 @@ Response
 
 All players information, scores and rating, at the moment will contain collective data and that of each map.
 
+#### Parameters
+
+Match ID:
+- Required
+- Giving First
+- No Default
+- HLTV Match ID, given as int in form of string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.match.playerScores(MatchID)`
+
+Response
+
+`{
+    "collective": {
+        "players": [
+            {
+                "adr": "ADR",
+                "alias": "Alias",
+                "kast": "KAST",
+                "kd": "KK-DD",
+                "kd_diff": DIFFERNECE OF KD,
+                "rating": "RATING",
+                "real_name": "REAL NAME"
+            },
+            So on,
+        ]
+    },
+    "map_0": {
+        "map_name": "map",
+        "players": [
+            {
+                "adr": "ADR",
+                "alias": "Alias",
+                "kast": "KAST",
+                "kd": "KK-DD",
+                "kd_diff": DIFFERNECE OF KD,
+                "rating": "RATING",
+                "real_name": "REAL NAME"
+            },
+            So on,
+        ]
+    },
+    "map_1": {
+        "map_name": "map",
+        "players": [
+            {
+                "adr": "ADR",
+                "alias": "Alias",
+                "kast": "KAST",
+                "kd": "KK-DD",
+                "kd_diff": DIFFERNECE OF KD,
+                "rating": "RATING",
+                "real_name": "REAL NAME"
+            },
+            So on,
+        ]
+    }
+}`
+
 ### Players in Match
 
 List of all players participating in the match.
