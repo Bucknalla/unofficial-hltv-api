@@ -742,9 +742,13 @@ Response
 
 `["MVP At X", "#1 2018", etc.]`
 
+---
+
 ## Hltv
 
 All functions related exclusively to the hltv site, such as rankings custom site search, events, professional matches today and the results of matches played today.
+
+---
 
 ### Global Rankings
 
@@ -851,9 +855,61 @@ Result
     So on
 ]`
 
+---
+
 ### Query
 
 The site has a custom search function, this will return everything related to the query and classify results.
+
+#### Parameters
+Query:
+- Required
+- Given First
+- String Request
+- Gets all results related to query from hltvs search.
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.hltv.query(Query)`
+
+Response
+
+`{
+    "events": [
+        {
+            "event": "Event name",
+            "hltv_id": "hltv id"
+        },
+        So on,
+    ],
+    "players": [
+        {
+            "hltv_id": "hltv player id",
+            "player": "player full name and alias"
+        },
+        So on,
+    ],
+    "teams": [
+        {
+            "hltv_id": "hltv team id",
+            "team": "team name"
+        },
+        So on,
+    ],
+    "topics": [
+        {
+            "date": "YYYY-MM-DD",
+            "event_id": "THREAD ID",
+            "forum": "FORUM NAME",
+            "topic": "TOPIC NAME"
+        },
+        So on,
+    ]
+}`
+
+---
 
 ### Events
 
