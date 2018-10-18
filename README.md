@@ -1029,6 +1029,36 @@ Response
 
 All rewatch links including GOTV and twitch if given and the nationality of those broadcasts, if it does not contain the GOTV or stream download it should not have it, to download the GOTV demo use the ID in the format: https://www.hltv.org/download/demo/DEMO_ID_HERE
 
+#### Parameters
+
+Match ID:
+- Required
+- Giving First
+- No Default
+- HLTV Match ID, given as int in form of string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.match.rewatch(matchId)`
+
+Response
+
+`{
+    "gotvId": "gotv id",
+    "watch": [
+        {
+            "broadcast_country": "broadcast country, can assume as language",
+            "broadcast_title": "title of broadcast",
+            "link": "full link
+        },
+        So on,
+    ]
+}`
+
+---
+
 ### Veto
 
 Contains all veto data given, can be kept with line breaks or not, if requested.
