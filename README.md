@@ -1164,6 +1164,38 @@ Response
 
 List of all players participating in the match.
 
+#### Parameters
+
+Match ID:
+- Required
+- Giving First
+- No Default
+- HLTV Match ID, given as int in form of string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.match.players(matchID)`
+
+Response
+
+`{
+    "players": [
+        "player",
+        "player",
+        "player",
+        "player",
+        "player",
+        "player",
+        "player",
+        "player",
+        "player",
+        "player"
+    ]
+}
+`
+
 ### Maps
 
 All maps that have been played.
