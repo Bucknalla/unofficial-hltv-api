@@ -1002,6 +1002,29 @@ Contains all functions related to scraping post match thread, such as final scor
 
 Final score, normal 16 - X in a bo1 or 2 - X in a bo3 for example.
 
+#### Parameters
+
+Match ID:
+- Required
+- Giving First
+- No Default
+- HLTV Match ID, given as int in form of string
+
+#### Request Format 1 of 1
+
+Request
+
+`hltv.match.score(matchId)`
+
+Response
+
+`{
+    "loser_score": "score",
+    "winner_score": "score"
+}`
+
+---
+
 ### Rewatch
 
 All rewatch links including GOTV and twitch if given and the nationality of those broadcasts, if it does not contain the GOTV or stream download it should not have it, to download the GOTV demo use the ID in the format: https://www.hltv.org/download/demo/DEMO_ID_HERE
