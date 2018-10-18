@@ -10,21 +10,9 @@ from datetime import datetime
 # Weapon name resolver & map resolver
 weaponsRef = {"awp": "AWP","ak47": "AK47","m4a1_silencer": "M4A1-S","m4a1": "M4A4","deagle": "Desert Eagle","usp_silencer": "USP-S","p250": "P250","glock": "Glock-18","cz75a": "CZ-75 Auto","ump45": "UMP-45","ssg08": "SSG-08","famas": "FAMAS","hkp2000": "P2000","mp7": "MP7","galilar": "Galil-AR","fiveseven": "Five-Seven","tec9": "Tec-9","hegrenade": "HE Grenade","mac10": "MAC-10","mp9": "MP9","mag7": "MAG7","inferno": "Molotov","p90": "P-90","knife_default_ct": "Default Knife","knife_karambit": "Karambit","knife_butterfly": "Butterfly Knife","knife_flip": "Flip Knife","xm1014": "XM1014","knife_t": "Default Knife","elite": "Dual Barettas","knife_m9_bayonet": "M9 Bayonet","usp_silencer_off": "USP-S (Unsilenced)","aug": "AUG","bayonet": "Bayonet","scar20": "SCAR-20","world": "Suicide","knife_push": "Shadow Daggers","sawedoff": "Sawed Off","nova": "Nova","bizon": "PP-Bizon","taser": "Zeus X27","sg556": "SG-553","knife": "Knife","knife_gut": "Gut Knife","knife_survival_bowie": "Bowie Knife","knife_falchion": "Falchion Knife","negev": "Negev","knife_tactical": "Huntsman Knife","revolver": "R8 Revolver","gallil": "Galil","mp5sd": "MP5-SD","g3sg1": "G3SG1"}
 mapResolver = {"d2": "Dust 2", "cch": "Cache", "ovp": "Overpass", "mrg": "Mirage", "nuke": "Nuke", "inf": "Inferno", "trn": "Train", "cbl": "Cobblestone", "bo1": "bo1", "bo3": "bo3", "bo5": "bo5"}
- 
-def webWorker(teamLink):
-	#Fakes header otherwise 403
-	hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-       'Accept-Encoding': 'none',
-       'Accept-Language': 'en-US,en;q=0.8',
-       'Connection': 'keep-alive'}
 
-	webReq = urllib.request.Request(teamLink, headers=hdr) # Formats Request w/ URL & Fake Headers Otherwise Denied
-	webReq = urllib.request.urlopen(webReq).read() # Reads Response
-	webReq = webReq.decode("utf-8") # Decodes Response as Usually contains unicode characters
-
-	return BeautifulSoup(webReq, 'html.parser') # Loads data in BS
+#Fakes header otherwise 403 & Formats Request w/ URL & Fake Headers Otherwise Denied & Decodes Response as Usually contains unicode characters  & Loads Beautiful Soup & Returns
+webWorker = lambda teamLink: BeautifulSoup(urllib.request.urlopen(urllib.request.Request(teamLink, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3','Accept-Encoding': 'none','Accept-Language': 'en-US,en;q=0.8','Connection': 'keep-alive'})).read().decode("utf-8"), 'html.parser') # Loads data in BS
 
 def getId(teamRequest):
 
@@ -59,7 +47,11 @@ class teams:
 			# Have to find the player IDs before this can be used
 			playerIds = [i.get("href").split("/")[2] for i in webWorker("https://www.hltv.org/team/" + teamId + "/bot").find("div", {"class": "bodyshot-team"}).findAll("a")]
 
-			bsData = webWorker("https://www.hltv.org/stats/lineup?lineup=" + playerIds[0] + "&lineup=" + playerIds[1] + "&lineup=" + playerIds[2] + "&lineup=" + playerIds[3] + "&lineup=" + playerIds[4] + "&minLineupMatch=5")
+			try:
+				bsData = webWorker("https://www.hltv.org/stats/lineup?lineup=" + playerIds[0] + "&lineup=" + playerIds[1] + "&lineup=" + playerIds[2] + "&lineup=" + playerIds[3] + "&lineup=" + playerIds[4] + "&minLineupMatch=5")
+			except IndexError:
+				raise ValueError("Unable to get team data on request.")
+
 			bsData0 = bsData.findAll("div", {"class": "teammate-info standard-box"})
 			bsData1 = bsData.findAll("img") # Ugly but works very well
 
@@ -98,8 +90,9 @@ class teams:
 
 	def shortStats(teamRequest):
 		# Ranking || Weeks in Top 30 || Location || Basic Roster
+		bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
 		data = {"ranking": teams.ranking(teamRequest)["ranking"],"roster": teams.roster(teamRequest, False)["roster"]}
-		data["weeks_in_top_30"] = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "profile-team-stat"})[1].text[23:]
+		data["weeks_in_top_30"] = bsData.findAll("div", {"class": "profile-team-stat"})[1].text[23:]
 		data["location"] = bsData.findAll("div", {"class": "team-country"})[0].text[1:]
 		return data
 
@@ -253,7 +246,7 @@ class player:
 		bsData = webWorker("https://www.hltv.org/stats/players/individual/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})
 		return {"kills": bsData[0].text[5:], "deaths": bsData[1].text[6:], "kdr": bsData[2].text[12:], "kpr": bsData[3].text[12:], "rounds_with_kills": bsData[4].text[17:], "kd_diff": bsData[5].text[33:], "opening_kills": bsData[6].text[19:], "opening_deaths": bsData[7].text[20:], "opening_kdr": bsData[8].text[18:], "opening_kill_rating": bsData[9].text[19:], "team_win_percent_after_first_kill": bsData[10].text[33:][:-1], "first_kill_in_won_rounds": bsData[11].text[24:][:-1], "0_kill_rounds": bsData[12].text[13:], "1_kill_rounds": bsData[13].text[13:], "2_kill_rounds": bsData[14].text[13:], "3_kill_rounds": bsData[15].text[13:], "4_kill_rounds": bsData[16].text[13:], "5_kill_rounds": bsData[17].text[13:], "rifle_kills": bsData[18].text[11:], "sniper_kills": bsData[19].text[12:], "smg_kills": bsData[20].text[9:], "pistol_kills": bsData[21].text[12:], "grenade_kills": bsData[22].text[7:], "other_kills": bsData[23].text[5:]}
 
-	def matches(playerRequest, stats=False, Limit=None):
+	def matches(playerRequest, Limit=None):
 
 		bsData = [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/matches/" + getId(playerRequest) + "/bot").findAll("tr")][1:]
 
@@ -390,6 +383,8 @@ class match:
 		# Need to quickly get the map data to piece together the map data
 		maps = [i.text for i in bsData.findAll("div", {"class": "mapname"})] # Quicker than calling the function
 
+
+
 		# Assumes Each Found Set of 10 Players Equates to a Map -> Iterate Through Players and Add
 		for i in range( (len(prettyData)-1) //2 ):
 
@@ -406,5 +401,3 @@ class match:
 	players = lambda matchID: {"players": [(''.join(i)) for i in list(filter(None, [list(filter(None, i.text.split("\n"))) for i in webWorker(matchIdResolver(matchID)).findAll("td", {"class": "player"})]))]}
 
 	maps = lambda matchID: [i.text for i in webWorker(matchIdResolver(matchID)).findAll("div", {"class": "mapname"})]
-
-print(teams.roster("4608", True))
