@@ -475,23 +475,35 @@ Details Limit:
 - Default of None
 - Determins limit of details data to save time
 
-#### Request Format 1 of 5
+#### Request Format 1 of 3
 
 Request 
 
-`ok`
+`hltv.player.clutches("7998", True, "1", True, None)`
 
 Response
 
-`ok`
+`{"losses": "LOSSES", "difference": "DIFFERENCE STARTS WITH +-", "wins": "WINS", "history": [{"date": "DD/MM YY", "team_one": "TEAM ONE", "team_two": "TEAM TWO", "map": "MAP FULL NAME", "status": "WON OR LOST", "round": "ROUND", "score": "FINAL SCORE"}, So on]`
 
-#### Request Format 2 of 5
+#### Request Format 2 of 3
 
-#### Request Format 3 of 5 
+Request 
 
-#### Request Format 4 of 5
+`hltv.player.clutches("7998", False, "1", True, None)`
 
-#### Request Format 5 of 5
+Response
+
+`{"history": [{"date": "DD/MM YY", "team_one": "TEAM ONE", "team_two": "TEAM TWO", "map": "MAP FULL NAME", "status": "WON OR LOST", "round": "ROUND", "score": "FINAL SCORE"}, So on]`
+
+#### Request Format 3 of 3
+
+Request 
+
+`hltv.player.clutches("7998", True, "1", False, None)`
+
+Response
+
+`{"losses": "LOSSES", "difference": "DIFFERENCE STARTS WITH +-", "wins": "WINS"}`
 
 ### Individual Stats
 
