@@ -313,7 +313,7 @@ class hltv:
 
 	events = lambda: [{"event": event[0], "dates": event[1]} for event in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/events").findAll("div", {"class": "content standard-box"})]]
 
-	upcomingMatches = lambda: [{"time": matchDetails[0], "match": (' ').join(matchDetails[1:3]), "event": matchDetails[4], "map": mapResolver[matchDetails[5]]} for matchDetails in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"})]]
+	upcomingMatches = lambda: [{"time": matchDetails[0], "match": (' ').join(matchDetails[1:4]), "event": matchDetails[4], "map": mapResolver[matchDetails[5]]} for matchDetails in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"})]]
 
 	todaysResults = lambda: [{"team_one": match[0], "team_two": match[2], "score": match[1], "tournament": match[3], "map": mapResolver[match[4]]} for match in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/results?content=vod").find("div", {"class": "results-sublist"}).findAll("div", {"class": "result"})]]
 
