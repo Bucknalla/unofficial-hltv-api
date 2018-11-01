@@ -15,385 +15,393 @@ mapResolver = {"d2": "Dust 2", "cch": "Cache", "ovp": "Overpass", "mrg": "Mirage
 webWorker = lambda teamLink: BeautifulSoup(urllib.request.urlopen(urllib.request.Request(teamLink, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3','Accept-Encoding': 'none','Accept-Language': 'en-US,en;q=0.8','Connection': 'keep-alive'})).read().decode("utf-8"), 'html.parser') # Loads data in BS
 
 def getId(teamRequest):
-	try:
-		int(teamRequest) == int(teamRequest)
-		return teamRequest
-	except ValueError:
-		raise ValueError("Unknown ID Reference, use a number.")
+    try:
+        int(teamRequest) == int(teamRequest)
+        return teamRequest
+    except ValueError:
+        raise ValueError("Unknown ID Reference, use a number.")
 
 def matchIdResolver(matchRequest):
-	if (matchRequest[0:4] == "http"):
-		return matchRequest
-	else:
-		try:
-			int(matchRequest) == int(matchRequest)
-			return "https://www.hltv.org/matches/" + matchRequest + "/bots"
+    if (matchRequest[0:4] == "http"):
+        return matchRequest
+    else:
+        try:
+            int(matchRequest) == int(matchRequest)
+            return "https://www.hltv.org/matches/" + matchRequest + "/bots"
 
-		except ValueError:
-			raise ValueError("Invalid Match Id Type")
+        except ValueError:
+            raise ValueError("Invalid Match Id Type")
 
-class teams:
+class teams():
 
-	def roster(teamRequest, complex=False):
-		teamId = getId(teamRequest)
-		
-		if (complex):
-			data = {"roster": {"player0": {},"player1": {},"player2": {},"player3": {},"player4": {}},"wdl": {}}
+    def roster(self, teamRequest, complex=False):
+        teamId = getId(teamRequest)
+        
+        if (complex):
+            data = {"roster": {"player0": {},"player1": {},"player2": {},"player3": {},"player4": {}},"wdl": {}}
 
-			# Have to find the player IDs before this can be used
-			playerIds = [i.get("href").split("/")[2] for i in webWorker("https://www.hltv.org/team/" + teamId + "/bot").find("div", {"class": "bodyshot-team"}).findAll("a")]
+            # Have to find the player IDs before this can be used
+            playerIds = [i.get("href").split("/")[2] for i in webWorker("https://www.hltv.org/team/" + teamId + "/bot").find("div", {"class": "bodyshot-team"}).findAll("a")]
 
-			try:
-				bsData = webWorker("https://www.hltv.org/stats/lineup?lineup=" + playerIds[0] + "&lineup=" + playerIds[1] + "&lineup=" + playerIds[2] + "&lineup=" + playerIds[3] + "&lineup=" + playerIds[4] + "&minLineupMatch=5")
-			except IndexError:
-				raise ValueError("Unable to get team data on request.")
+            try:
+                bsData = webWorker("https://www.hltv.org/stats/lineup?lineup=" + playerIds[0] + "&lineup=" + playerIds[1] + "&lineup=" + playerIds[2] + "&lineup=" + playerIds[3] + "&lineup=" + playerIds[4] + "&minLineupMatch=5")
+            except IndexError:
+                raise ValueError("Unable to get team data on request.")
 
-			bsData0 = bsData.findAll("div", {"class": "teammate-info standard-box"})
-			bsData1 = bsData.findAll("img") # Ugly but works very well
+            bsData0 = bsData.findAll("div", {"class": "teammate-info standard-box"})
+            bsData1 = bsData.findAll("img") # Ugly but works very well
 
-			for i in range(len(bsData0)):
+            for i in range(len(bsData0)):
 
-				data["roster"]["player" + str(i)]["alias"] = bsData0[i].find("div", {"class": "text-ellipsis"}).text # Player Alias
-				data["roster"]["player" + str(i)]["country"] = bsData0[i].find("img").get("title") # Contains Country Name
-				data["roster"]["player" + str(i)]["id"] = playerIds[i] # Simple Called from Reference
-				data["roster"]["player" + str(i)]["maps_played"] = list(filter(None, ('').join(list(filter(None, bsData0[i].text.split(" ")))).split("\n")))[2][:-4] # Gets Text -> Removes Escape Characters & Spaces -> Into Array -> Gets Map Data from Array -> Leaves only map played number
-				data["roster"]["player" + str(i)]["picture"] = bsData1[3 + (i * 2)].get("src") # Players Images @ 3, 5, 7, 9, 11
-				data["roster"]["player" + str(i)]["real_name"] = bsData1[3 + (i * 2)].get("alt").split("'")[0] + bsData1[3 + (i * 2)].get("alt").split("'")[-1][1:] # Gets Alt Which is First Name 'Alias' Last Name -> Splits to Array -> Places Together First and Last name -> Removes any addition spaces
+                data["roster"]["player" + str(i)]["alias"] = bsData0[i].find("div", {"class": "text-ellipsis"}).text # Player Alias
+                data["roster"]["player" + str(i)]["country"] = bsData0[i].find("img").get("title") # Contains Country Name
+                data["roster"]["player" + str(i)]["id"] = playerIds[i] # Simple Called from Reference
+                data["roster"]["player" + str(i)]["maps_played"] = list(filter(None, ('').join(list(filter(None, bsData0[i].text.split(" ")))).split("\n")))[2][:-4] # Gets Text -> Removes Escape Characters & Spaces -> Into Array -> Gets Map Data from Array -> Leaves only map played number
+                data["roster"]["player" + str(i)]["picture"] = bsData1[3 + (i * 2)].get("src") # Players Images @ 3, 5, 7, 9, 11
+                data["roster"]["player" + str(i)]["real_name"] = bsData1[3 + (i * 2)].get("alt").split("'")[0] + bsData1[3 + (i * 2)].get("alt").split("'")[-1][1:] # Gets Alt Which is First Name 'Alias' Last Name -> Splits to Array -> Places Together First and Last name -> Removes any addition spaces
 
-			data["maps_played"] = bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[0].text
-			data["wdl"]["win"] = "".join(bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[1].text.split()).split("/")[0]
-			data["wdl"]["draw"] = "".join(bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[1].text.split()).split("/")[1]
-			data["wdl"]["loss"] = "".join(bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[1].text.split()).split("/")[2]
-			data["total_kills"] = bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[2].text
-			data["total_deaths"] = bsData.findAll("div", {"class": "columns"})[1].findAll("div", {"class": "large-strong"})[0].text
-			data["rounds_played"] = bsData.findAll("div", {"class": "columns"})[1].findAll("div", {"class": "large-strong"})[1].text
-			data["kdr"] = bsData.findAll("div", {"class": "columns"})[1].findAll("div", {"class": "large-strong"})[2].text
+            data["maps_played"] = bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[0].text
+            data["wdl"]["win"] = "".join(bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[1].text.split()).split("/")[0]
+            data["wdl"]["draw"] = "".join(bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[1].text.split()).split("/")[1]
+            data["wdl"]["loss"] = "".join(bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[1].text.split()).split("/")[2]
+            data["total_kills"] = bsData.findAll("div", {"class": "columns"})[0].findAll("div", {"class": "large-strong"})[2].text
+            data["total_deaths"] = bsData.findAll("div", {"class": "columns"})[1].findAll("div", {"class": "large-strong"})[0].text
+            data["rounds_played"] = bsData.findAll("div", {"class": "columns"})[1].findAll("div", {"class": "large-strong"})[1].text
+            data["kdr"] = bsData.findAll("div", {"class": "columns"})[1].findAll("div", {"class": "large-strong"})[2].text
 
-			return data
+            return data
 
 
-		else:
+        else:
 
-			data = {"roster": []}
+            data = {"roster": []}
 
-			bsData = webWorker("https://www.hltv.org/team/" + teamId + "/bot") # Web Requests
-			bsData = bsData.findAll('div', {"class": "bodyshot-team"}) # Locates Roster Information Section
-			
-			bsData = ('').join(list(filter(None, bsData[0].text.split(" ")))) # Their names have a trailing space when processed, this removes it
-			data["roster"] = list(filter(None, bsData.split("\n"))) # Contains escape characters, removed and sorted into array
+            bsData = webWorker("https://www.hltv.org/team/" + teamId + "/bot") # Web Requests
+            bsData = bsData.findAll('div', {"class": "bodyshot-team"}) # Locates Roster Information Section
+            
+            bsData = ('').join(list(filter(None, bsData[0].text.split(" ")))) # Their names have a trailing space when processed, this removes it
+            data["roster"] = list(filter(None, bsData.split("\n"))) # Contains escape characters, removed and sorted into array
 
-			return data
+            return data
 
-	def shortStats(teamRequest):
-		# Ranking || Weeks in Top 30 || Location || Basic Roster
-		bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
-		data = {"ranking": teams.ranking(teamRequest)["ranking"],"roster": teams.roster(teamRequest, False)["roster"]}
-		data["weeks_in_top_30"] = bsData.findAll("div", {"class": "profile-team-stat"})[1].text[23:]
-		data["location"] = bsData.findAll("div", {"class": "team-country"})[0].text[1:]
-		return data
+    def shortStats(self, teamRequest):
+        # Ranking || Weeks in Top 30 || Location || Basic Roster
+        bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
+        data = {"ranking": self.ranking(teamRequest)["ranking"],"roster": self.roster(teamRequest, False)["roster"]}
+        data["weeks_in_top_30"] = bsData.findAll("div", {"class": "profile-team-stat"})[1].text[23:]
+        data["location"] = bsData.findAll("div", {"class": "team-country"})[0].text[1:]
+        return data
 
-	def longStats(teamRequest):
+    def longStats(self, teamRequest):
 
-		shortStatsInc = teams.shortStats(teamRequest)
-		mapData = teams.mapData(teamRequest)
-		rosterStats = teams.roster(teamRequest, True)
-		bsData0 = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
+        shortStatsInc = self.shortStats(teamRequest)
+        mapData = self.mapData(teamRequest)
+        rosterStats = self.roster(teamRequest, True)
+        bsData0 = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
 
-		return {"ranking": shortStatsInc["ranking"], "weeks_in_top_30": shortStatsInc["weeks_in_top_30"], "location": shortStatsInc["location"], "roster": teams.roster(teamRequest, False)["roster"], "upcoming_matches": teams.upcomingMatches(teamRequest), "recent_matches": teams.recentResults(teamRequest), "peak": bsData0.findAll("span", {"class": "value"})[1].text[1:], "weeks_at_peak": bsData0.findAll("span", {"class": "value"})[2].text[:-5], "maps_played": rosterStats["maps_played"], "wdl": { "wins": rosterStats["wdl"]["win"], "draws": rosterStats["wdl"]["draw"], "loss": rosterStats["wdl"]["loss"]}, "total_kills": rosterStats["total_kills"], "total_deaths": rosterStats["total_deaths"], "maps": {"train": mapData["train"], "overpass": mapData["overpass"], "mirage": mapData["mirage"], "season": mapData["season"], "dust2": mapData["dust2"], "inferno": mapData["inferno"], "cobblestone": mapData["cobblestone"], "nuke": mapData["nuke"], "cache": mapData["cache"]}}
+        return {"ranking": shortStatsInc["ranking"], "weeks_in_top_30": shortStatsInc["weeks_in_top_30"], "location": shortStatsInc["location"], "roster": self.roster(teamRequest, False)["roster"], "upcoming_matches": self.upcomingMatches(teamRequest), "recent_matches": self.recentResults(teamRequest), "peak": bsData0.findAll("span", {"class": "value"})[1].text[1:], "weeks_at_peak": bsData0.findAll("span", {"class": "value"})[2].text[:-5], "maps_played": rosterStats["maps_played"], "wdl": { "wins": rosterStats["wdl"]["win"], "draws": rosterStats["wdl"]["draw"], "loss": rosterStats["wdl"]["loss"]}, "total_kills": rosterStats["total_kills"], "total_deaths": rosterStats["total_deaths"], "maps": {"train": mapData["train"], "overpass": mapData["overpass"], "mirage": mapData["mirage"], "season": mapData["season"], "dust2": mapData["dust2"], "inferno": mapData["inferno"], "cobblestone": mapData["cobblestone"], "nuke": mapData["nuke"], "cache": mapData["cache"]}}
 
-	def upcomingMatches(teamRequest):
-		# Upcoming Matches Only
-		bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "standard-box upcoming-match"})
-		data = [{"date": list(filter(None, bsData[i].text.split("\n")))[0], "match": list(filter(None, bsData[i].text.split("\n")))[1] + " " + list(filter(None, bsData[i].text.split("\n")))[2] + " " + list(filter(None, bsData[i].text.split("\n")))[3], "tournament": list(filter(None, bsData[i].text.split("\n")))[4]} for i in range(len(bsData))]
+    def upcomingMatches(self, teamRequest):
+        # Upcoming Matches Only
+        bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "standard-box upcoming-match"})
+        data = [{"date": list(filter(None, bsData[i].text.split("\n")))[0], "match": list(filter(None, bsData[i].text.split("\n")))[1] + " " + list(filter(None, bsData[i].text.split("\n")))[2] + " " + list(filter(None, bsData[i].text.split("\n")))[3], "tournament": list(filter(None, bsData[i].text.split("\n")))[4]} for i in range(len(bsData))]
 
-		return data
+        return data
 
-	def recentResults(teamRequest):
-		# Quick Recent Matches
+    def recentResults(self, teamRequest):
+        # Quick Recent Matches
 
-		bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
-		bsData0 = bsData.findAll("div", {"class": "standard-box result result-won"})
-		bsData1 = bsData.findAll("div", {"class": "standard-box result result-lost"})
+        bsData = webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot")
+        bsData0 = bsData.findAll("div", {"class": "standard-box result result-won"})
+        bsData1 = bsData.findAll("div", {"class": "standard-box result result-lost"})
 
-		# Essentially Comes in two section, wins and losses, same method for both, finds them all, parses and combines array
-		data = [{"score": list(filter(None, bsData0[i].text.split("\n")))[0], "match": list(filter(None, bsData0[i].text.split("\n")))[1] + " " + list(filter(None, bsData0[i].text.split("\n")))[2] + " " + list(filter(None, bsData0[i].text.split("\n")))[3], "tournament": list(filter(None, bsData0[i].text.split("\n")))[4], "status": "won"} for i in range(len(bsData0))] + [{"score": list(filter(None, bsData1[i].text.split("\n")))[0], "match": list(filter(None, bsData1[i].text.split("\n")))[1] + " " + list(filter(None, bsData1[i].text.split("\n")))[2] + " " + list(filter(None, bsData1[i].text.split("\n")))[3], "tournament": list(filter(None, bsData1[i].text.split("\n")))[4], "status": "loss"} for i in range(len(bsData1))]
+        # Essentially Comes in two section, wins and losses, same method for both, finds them all, parses and combines array
+        data = [{"score": list(filter(None, bsData0[i].text.split("\n")))[0], "match": list(filter(None, bsData0[i].text.split("\n")))[1] + " " + list(filter(None, bsData0[i].text.split("\n")))[2] + " " + list(filter(None, bsData0[i].text.split("\n")))[3], "tournament": list(filter(None, bsData0[i].text.split("\n")))[4], "status": "won"} for i in range(len(bsData0))] + [{"score": list(filter(None, bsData1[i].text.split("\n")))[0], "match": list(filter(None, bsData1[i].text.split("\n")))[1] + " " + list(filter(None, bsData1[i].text.split("\n")))[2] + " " + list(filter(None, bsData1[i].text.split("\n")))[3], "tournament": list(filter(None, bsData1[i].text.split("\n")))[4], "status": "loss"} for i in range(len(bsData1))]
 
-		return data
+        return data
 
-	def mapData(teamRequest):
-		# Map Stats: https://www.hltv.org/stats/teams/maps/6665/Astralis
-		
-		data = {}
+    def mapData(self, teamRequest):
+        # Map Stats: https://www.hltv.org/stats/teams/maps/6665/Astralis
+        
+        data = {}
 
-		bsData = webWorker("https://www.hltv.org/stats/teams/maps/" + getId(teamRequest) + "/bot").findAll("div", {"class", "map-pool-map-name"})
+        bsData = webWorker("https://www.hltv.org/stats/teams/maps/" + getId(teamRequest) + "/bot").findAll("div", {"class", "map-pool-map-name"})
 
-		# Can't really be sorted
-		for mapIndex in range(int(len(bsData) / 2)):
-			data[bsData[mapIndex].text.split("-")[0][:-1].lower()] = bsData[mapIndex].text.split("-")[1][:-1][1:]
-		
-		return data
+        # Can't really be sorted
+        for mapIndex in range(int(len(bsData) / 2)):
+            data[bsData[mapIndex].text.split("-")[0][:-1].lower()] = bsData[mapIndex].text.split("-")[1][:-1][1:]
+        
+        return data
 
-	def matchHistory(teamRequest, requestLimit=None):
-		# Match History: https://www.hltv.org/stats/teams/matches/6665/Astralis
-		bsData = list(filter(None, webWorker("https://www.hltv.org/stats/teams/matches/" + getId(teamRequest) + "/bot").findAll("table", {"class": "stats-table no-sort"})[0].text.split("\n")))[6:]
+    def matchHistory(self, teamRequest, requestLimit=None):
+        # Match History: https://www.hltv.org/stats/teams/matches/6665/Astralis
+        bsData = list(filter(None, webWorker("https://www.hltv.org/stats/teams/matches/" + getId(teamRequest) + "/bot").findAll("table", {"class": "stats-table no-sort"})[0].text.split("\n")))[6:]
 
-		if (requestLimit is None):
+        if (requestLimit is None):
 
-			data = [{"date": bsData[0::7][i], "event": bsData[1::7][i], "opponent": bsData[3::7][i], "map": bsData[4::7][i], "score": bsData[5::7][i], "result": {"W": "victory", "L": "loss", "T": "draw"}[bsData[6::7][i]]} for i in range(int(len(bsData) / 7))]
+            data = [{"date": bsData[0::7][i], "event": bsData[1::7][i], "opponent": bsData[3::7][i], "map": bsData[4::7][i], "score": bsData[5::7][i], "result": {"W": "victory", "L": "loss", "T": "draw"}[bsData[6::7][i]]} for i in range(int(len(bsData) / 7))]
 
-		else:
+        else:
 
-			if (requestLimit > len(bsData) / 7):
-				requestLimit = len(bsData) / 7
+            if (requestLimit > len(bsData) / 7):
+                requestLimit = len(bsData) / 7
 
-			data = [{"date": bsData[0::7][i], "event": bsData[1::7][i], "opponent": bsData[3::7][i], "map": bsData[4::7][i], "score": bsData[5::7][i], "result": {"W": "victory", "L": "loss", "T": "draw"}[bsData[6::7][i]]} for i in range(requestLimit)]
+            data = [{"date": bsData[0::7][i], "event": bsData[1::7][i], "opponent": bsData[3::7][i], "map": bsData[4::7][i], "score": bsData[5::7][i], "result": {"W": "victory", "L": "loss", "T": "draw"}[bsData[6::7][i]]} for i in range(requestLimit)]
 
-		return data
+        return data
 
-	ranking = lambda teamRequest: {"ranking": str(webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll('div', {"class": "profile-team-stat"})[0].find("a").text[-1:])} # Finds relevant data
+    ranking = lambda teamRequest: {"ranking": str(webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll('div', {"class": "profile-team-stat"})[0].find("a").text[-1:])} # Finds relevant data
 
-	bigAchivements = lambda teamRequest: [{"event": achivement.text.split("at")[1], "ranking": achivement.text.split("at")[0][:-1]} for achivement in webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "cell text-ellipsis achievement "})]
+    bigAchivements = lambda teamRequest: [{"event": achivement.text.split("at")[1], "ranking": achivement.text.split("at")[0][:-1]} for achivement in webWorker("https://www.hltv.org/team/" + getId(teamRequest) + "/bot").findAll("div", {"class": "cell text-ellipsis achievement "})]
 
-class player:
+class player():
 
-	def profile(playerRequest):
+    def profile(self, playerRequest):
 
-		bsData = webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot")
+        bsData = webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot")
 
-		return {"alias": bsData.find("div", {"class": "player-nick text-ellipsis"}).text, "real_name": bsData.find("div", {"class": "player-realname"}).text, "hltv_id": getId(playerRequest), "country": bsData.find("img", {"class": "flag"}).get("alt"), "profile_picture": bsData.find("img", {"class": "bodyshot-img"}).get("src"), "age": sub("[^0-9]", "", bsData.find("span", {"class": "profile-player-stat-value"}).text), "current_team": bsData.find("img", {"class": "profile-player-stat-team-logo"}).get("alt"), "top_20": [{"year": "20" + sub("[^0-9]", "", ranking.split("(")[1]),"ranking": sub("[^0-9]", "", ranking.split("(")[0])} for ranking in bsData.find("span", {"class": "profile-player-stat-value right"}).text.split(",")], "achivements": player.achivements(playerRequest)}
+        return {"alias": bsData.find("div", {"class": "player-nick text-ellipsis"}).text, "real_name": bsData.find("div", {"class": "player-realname"}).text, "hltv_id": getId(playerRequest), "country": bsData.find("img", {"class": "flag"}).get("alt"), "profile_picture": bsData.find("img", {"class": "bodyshot-img"}).get("src"), "age": sub("[^0-9]", "", bsData.find("span", {"class": "profile-player-stat-value"}).text), "current_team": bsData.find("img", {"class": "profile-player-stat-team-logo"}).get("alt"), "top_20": [{"year": "20" + sub("[^0-9]", "", ranking.split("(")[1]),"ranking": sub("[^0-9]", "", ranking.split("(")[0])} for ranking in bsData.find("span", {"class": "profile-player-stat-value right"}).text.split(",")], "achivements": player.achivements(playerRequest)}
 
-	def stats(playerRequest, _complex=False, filterMatch=None, timeFilter=None, rankingFilter=None):
-		
-		if (_complex):
-			# https://www.hltv.org/stats/players/ id /bot
-			customRequestString = "https://www.hltv.org/stats/players/" + getId(playerRequest) + "/bot"
-			useChar = "?" # Uses for manipulating PHP $_GET requests
-			if (filterMatch is not None):
-				customRequestString += useChar + "matchType=" + filterMatch
-				useChar = '&'
-			if (timeFilter is not None):
-				customRequestString += useChar + "startDate=" + timeFilter[0] + "&endDate=" + timeFilter[1]
-				useChar = '&'
-			if (rankingFilter is not None):
-				customRequestString += useChar + "rankingFilter=Top" + rankingFilter
+    def stats(self, playerRequest, _complex=False, filterMatch=None, timeFilter=None, rankingFilter=None):
+        
+        if (_complex):
+            # https://www.hltv.org/stats/players/ id /bot
+            customRequestString = "https://www.hltv.org/stats/players/" + getId(playerRequest) + "/bot"
+            useChar = "?" # Uses for manipulating PHP $_GET requests
+            if (filterMatch is not None):
+                customRequestString += useChar + "matchType=" + filterMatch
+                useChar = '&'
+            if (timeFilter is not None):
+                customRequestString += useChar + "startDate=" + timeFilter[0] + "&endDate=" + timeFilter[1]
+                useChar = '&'
+            if (rankingFilter is not None):
+                customRequestString += useChar + "rankingFilter=Top" + rankingFilter
 
-			stats = [sub("[^0-9.]", "", stat.text) for stat in webWorker("https://www.hltv.org/stats/players/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})] # Essentially sorts the data, removes unneeded text etc.
-			return {"kills_per_round": stats[7], "headshot": stats[1], "deaths_per_round": stats[10], "total_kills": stats[0], "total_deaths": stats[2], "kdr": stats[3], "adr": stats[4], "grenade_adr": stats[5], "rounds_played": stats[6], "assists_per_round": stats[9], "deaths_round": stats[10], "saved_by_teammate_per_round": stats[11], "saved_teammates_per_round": stats[12], "rating_1": stats[13][3:]}
+            stats = [sub("[^0-9.]", "", stat.text) for stat in webWorker("https://www.hltv.org/stats/players/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})] # Essentially sorts the data, removes unneeded text etc.
+            return {"kills_per_round": stats[7], "headshot": stats[1], "deaths_per_round": stats[10], "total_kills": stats[0], "total_deaths": stats[2], "kdr": stats[3], "adr": stats[4], "grenade_adr": stats[5], "rounds_played": stats[6], "assists_per_round": stats[9], "deaths_round": stats[10], "saved_by_teammate_per_round": stats[11], "saved_teammates_per_round": stats[12], "rating_1": stats[13][3:]}
 
-		else:
+        else:
 
-			# Basic Data
-			bsData = webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot").findAll("span", {"class": "statsVal"})
-			return {"rating_2": bsData[0].text, "kills_per_round": bsData[1].text, "headshot": bsData[2].text[:-1], "maps_played": bsData[3].text, "deaths_per_round": bsData[4].text, "rounds_contributed": bsData[5].text[:-1],}
+            # Basic Data
+            bsData = webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot").findAll("span", {"class": "statsVal"})
+            return {"rating_2": bsData[0].text, "kills_per_round": bsData[1].text, "headshot": bsData[2].text[:-1], "maps_played": bsData[3].text, "deaths_per_round": bsData[4].text, "rounds_contributed": bsData[5].text[:-1],}
 
-	def clutches(playerRequest, getStats=False, clutchType="1", getDetails=False, detailsLimit=None):
-		
-		if (getStats == False and getDetails == False):
-			# Asking for no data essentially
-			return None
+    def clutches(self, usp_silencer_off, playerRequest, getStats=False, clutchType="1", getDetails=False, detailsLimit=None):
+        
+        if (getStats == False and getDetails == False):
+            # Asking for no data essentially
+            return None
 
-		else:
-			# Looks like the data function could be compressed more but the statements aren't mutually exclusive
-			bsData, data = webWorker("https://www.hltv.org/stats/players/clutches/" + getId(playerRequest) + "/1on" + clutchType + "/bot"), {}
+        else:
+            # Looks like the data function could be compressed more but the statements aren't mutually exclusive
+            bsData, data = webWorker("https://www.hltv.org/stats/players/clutches/" + getId(playerRequest) + "/1on" + clutchType + "/bot"), {}
 
-			if (getStats):
+            if (getStats):
 
-				if (clutchType == "1"):
-					# Slightly More Complex Data
-					data["losses"] = (sub("[^0-9]", "", bsData.findAll("div", {"class": "summary-box standard-box "})[0].text))
-					data["difference"] = (sub("[^0-9+-]", "", bsData.findAll("div", {"class": "summary-box standard-box "})[1].text))
+                if (clutchType == "1"):
+                    # Slightly More Complex Data
+                    data["losses"] = (sub("[^0-9]", "", bsData.findAll("div", {"class": "summary-box standard-box "})[0].text))
+                    data["difference"] = (sub("[^0-9+-]", "", bsData.findAll("div", {"class": "summary-box standard-box "})[1].text))
 
-					if (data["difference"][0] == "+"):
-						data["wins"] = str(int(data["losses"]) + int(data["difference"][1:]))
-					else:
-						data["wins"] = str(int(data["losses"]) - int(data["difference"][1:]))
+                    if (data["difference"][0] == "+"):
+                        data["wins"] = str(int(data["losses"]) + int(data["difference"][1:]))
+                    else:
+                        data["wins"] = str(int(data["losses"]) - int(data["difference"][1:]))
 
-				else:
-					# Less complicated
-					data["wins"] = bsData.find("div", {"class": "summary-box standard-box"}).find("div", {"class": "value"}).text
+                else:
+                    # Less complicated
+                    data["wins"] = bsData.find("div", {"class": "summary-box standard-box"}).find("div", {"class": "value"}).text
 
-			if (getDetails):
+            if (getDetails):
 
-				detailsData, clutchHistory = [], []
-				detailsData = [list(filter(None, i.text.split("\n"))) for i in bsData.findAll("tr")][1:]
+                detailsData, clutchHistory = [], []
+                detailsData = [list(filter(None, i.text.split("\n"))) for i in bsData.findAll("tr")][1:]
 
-				for i in detailsData:
-					i.pop(3)
-					i.append(sub("[^0-9]", "", i[1]) + " - " + sub("[^0-9]", "", i[2]))
-					i[1] = i[1].split("(")[0][:-1]
-					i[2] = i[2].split("(")[0][:-1]
+                for i in detailsData:
+                    i.pop(3)
+                    i.append(sub("[^0-9]", "", i[1]) + " - " + sub("[^0-9]", "", i[2]))
+                    i[1] = i[1].split("(")[0][:-1]
+                    i[2] = i[2].split("(")[0][:-1]
 
-				if (detailsLimit is None):
-					clutchHistory = [{"date": detailsData[i][0], "team_one": detailsData[i][1], "team_two": detailsData[i][2], "map": detailsData[i][3], "status": detailsData[i][4], "round": detailsData[i][5], "score": detailsData[i][6]} for i in range(len(detailsData))] 
+                if (detailsLimit is None):
+                    clutchHistory = [{"date": detailsData[i][0], "team_one": detailsData[i][1], "team_two": detailsData[i][2], "map": detailsData[i][3], "status": detailsData[i][4], "round": detailsData[i][5], "score": detailsData[i][6]} for i in range(len(detailsData))] 
 
-				else:
+                else:
 
-					if detailsLimit > len(detailsData):
-						detailsLimit = len(detailsData)
+                    if detailsLimit > len(detailsData):
+                        detailsLimit = len(detailsData)
 
-					clutchHistory = {"history": [{"date": detailsData[i][0], "team_one": detailsData[i][1], "team_two": detailsData[i][2], "map": detailsData[i][3], "status": detailsData[i][4], "round": detailsData[i][5], "score": detailsData[i][6]} for i in range(detailsLimit)]}
+                    clutchHistory = {"history": [{"date": detailsData[i][0], "team_one": detailsData[i][1], "team_two": detailsData[i][2], "map": detailsData[i][3], "status": detailsData[i][4], "round": detailsData[i][5], "score": detailsData[i][6]} for i in range(detailsLimit)]}
 
-				data["history"] = clutchHistory
+                data["history"] = clutchHistory
 
-			return data
+            return data
 
-	def individual(playerRequest):
-		
-		bsData = webWorker("https://www.hltv.org/stats/players/individual/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})
-		return {"kills": bsData[0].text[5:], "deaths": bsData[1].text[6:], "kdr": bsData[2].text[12:], "kpr": bsData[3].text[12:], "rounds_with_kills": bsData[4].text[17:], "kd_diff": bsData[5].text[33:], "opening_kills": bsData[6].text[19:], "opening_deaths": bsData[7].text[20:], "opening_kdr": bsData[8].text[18:], "opening_kill_rating": bsData[9].text[19:], "team_win_percent_after_first_kill": bsData[10].text[33:][:-1], "first_kill_in_won_rounds": bsData[11].text[24:][:-1], "0_kill_rounds": bsData[12].text[13:], "1_kill_rounds": bsData[13].text[13:], "2_kill_rounds": bsData[14].text[13:], "3_kill_rounds": bsData[15].text[13:], "4_kill_rounds": bsData[16].text[13:], "5_kill_rounds": bsData[17].text[13:], "rifle_kills": bsData[18].text[11:], "sniper_kills": bsData[19].text[12:], "smg_kills": bsData[20].text[9:], "pistol_kills": bsData[21].text[12:], "grenade_kills": bsData[22].text[7:], "other_kills": bsData[23].text[5:]}
+    def individual(self, playerRequest):
+        
+        bsData = webWorker("https://www.hltv.org/stats/players/individual/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})
+        return {"kills": bsData[0].text[5:], "deaths": bsData[1].text[6:], "kdr": bsData[2].text[12:], "kpr": bsData[3].text[12:], "rounds_with_kills": bsData[4].text[17:], "kd_diff": bsData[5].text[33:], "opening_kills": bsData[6].text[19:], "opening_deaths": bsData[7].text[20:], "opening_kdr": bsData[8].text[18:], "opening_kill_rating": bsData[9].text[19:], "team_win_percent_after_first_kill": bsData[10].text[33:][:-1], "first_kill_in_won_rounds": bsData[11].text[24:][:-1], "0_kill_rounds": bsData[12].text[13:], "1_kill_rounds": bsData[13].text[13:], "2_kill_rounds": bsData[14].text[13:], "3_kill_rounds": bsData[15].text[13:], "4_kill_rounds": bsData[16].text[13:], "5_kill_rounds": bsData[17].text[13:], "rifle_kills": bsData[18].text[11:], "sniper_kills": bsData[19].text[12:], "smg_kills": bsData[20].text[9:], "pistol_kills": bsData[21].text[12:], "grenade_kills": bsData[22].text[7:], "other_kills": bsData[23].text[5:]}
 
-	def matches(playerRequest, Limit=None):
+    def matches(self, playerRequest, Limit=None):
 
-		bsData = [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/matches/" + getId(playerRequest) + "/bot").findAll("tr")][1:]
+        bsData = [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/matches/" + getId(playerRequest) + "/bot").findAll("tr")][1:]
 
-		for item in bsData:
-			item.append(item[1].split("(")[1][:-1] + " - " + item[2].split("(")[1][:-1])
-			item[1] = item[1].split("(")[0][:-1]
-			item[2] = item[2].split("(")[0][:-1]
-			item[3] = mapResolver[item[3]]
+        for item in bsData:
+            item.append(item[1].split("(")[1][:-1] + " - " + item[2].split("(")[1][:-1])
+            item[1] = item[1].split("(")[0][:-1]
+            item[2] = item[2].split("(")[0][:-1]
+            item[3] = mapResolver[item[3]]
 
-		if (Limit is None):
+        if (Limit is None):
 
-			return [{"date": bsData[i][0], "team_one": bsData[i][1], "team_two": bsData[i][2], "map": bsData[i][3], "kd": bsData[i][4], "kd_diff": bsData[i][5], "rating": bsData[i][6], "score": bsData[i][7]} for i in range(len(bsData))]
+            return [{"date": bsData[i][0], "team_one": bsData[i][1], "team_two": bsData[i][2], "map": bsData[i][3], "kd": bsData[i][4], "kd_diff": bsData[i][5], "rating": bsData[i][6], "score": bsData[i][7]} for i in range(len(bsData))]
 
-		else:
+        else:
 
-			if (Limit > len(bsData)):
-				Limit = len(bsData)
+            if (Limit > len(bsData)):
+                Limit = len(bsData)
 
-			return [{"date": bsData[i][0], "team_one": bsData[i][1], "team_two": bsData[i][2], "map": bsData[i][3], "kd": bsData[i][4], "kd_diff": bsData[i][5], "rating": bsData[i][6], "score": bsData[i][7]} for i in range(Limit)]
+            return [{"date": bsData[i][0], "team_one": bsData[i][1], "team_two": bsData[i][2], "map": bsData[i][3], "kd": bsData[i][4], "kd_diff": bsData[i][5], "rating": bsData[i][6], "score": bsData[i][7]} for i in range(Limit)]
 
-	def weapons(playerRequest):
+    def weapons(self, playerRequest):
 
-		data = {}
+        data = {}
 
-		dataList = [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/weapon/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})]
-		
-		for i in dataList:
-			i[0] = weaponsRef[i[0].split(".")[1][1:]]
-			data[i[0]] = i[1]
+        dataList = [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/weapon/" + getId(playerRequest) + "/bot").findAll("div", {"class": "stats-row"})]
+        
+        for i in dataList:
+            i[0] = weaponsRef[i[0].split(".")[1][1:]]
+            data[i[0]] = i[1]
 
-		return data
+        return data
 
-	opponents = lambda playerRequest: [{"opponent": i[0], "maps_played": i[1], "kd_diff": i[2], "kdr": i[3], "rating_1": i[4]} for i in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/opponents/team/" + getId(playerRequest) + "/bot").find("table", {"class": "stats-table player-ratings-table sortable-table"}).findAll("tr")][1:]]
+    opponents = lambda playerRequest: [{"opponent": i[0], "maps_played": i[1], "kd_diff": i[2], "kdr": i[3], "rating_1": i[4]} for i in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/stats/players/opponents/team/" + getId(playerRequest) + "/bot").find("table", {"class": "stats-table player-ratings-table sortable-table"}).findAll("tr")][1:]]
 
-	achivements = lambda playerRequest: [trophy.get("title") for trophy in webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot").findAll("span", {"class": "trophyDescription"})]
+    achivements = lambda playerRequest: [trophy.get("title") for trophy in webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot").findAll("span", {"class": "trophyDescription"})]
 
-class hltv:
+class hltv(object):
 
-	def rankings(searchSpecific=False, customYear=datetime.now().year, customMonth=["january", "february", "march", "april", "june", "july", "august", "september", "october", "november", "december"][datetime.now().month], customDay=datetime.now().day):
-		# Slightly more complex, as the link is dynamic hence it is only updated live from the main site.
-		if (customYear == datetime.now().year and customMonth == ["january", "february", "march", "april", "june", "july", "august", "september", "october", "november", "december"][datetime.now().month] and customDay == datetime.now().day):
-			# Latest date
-			bsData = webWorker("https://www.hltv.org/ranking/teams/")
-		
-		else:
-			bsData = webWorker("https://www.hltv.org/ranking/teams/" + str(customYear) + "/" + str(customMonth) + "/" + str(customDay))
+    def rankings(self, searchSpecific=False, customYear=datetime.now().year, customMonth=datetime.now().strftime("%B").lower(), customDay=datetime.now().day):
+    # Slightly more complex, as the link is dynamic hence it is only updated live from the main site.
+        if (customYear == datetime.now().year and customMonth == datetime.now().strftime("%B").lower() and customDay == datetime.now().day):
+            # Latest date
+            bsData = webWorker("https://www.hltv.org/ranking/teams/")            
+        else:
+            bsData = webWorker("https://www.hltv.org/ranking/teams/" + str(customYear) + "/" + str(customMonth) + "/" + str(customDay))
 
-		data = [{"ranking": teamData[0][1:], "points": sub("[^0-9]", "", teamData[1].split("(")[1]), "team": teamData[1].split("(")[0],"roster": teamData[2:][:-1],"recent_change": teamData[-1]} for teamData in [list(filter(None, i.text.split("\n"))) for i in [i.find("div", {"class": "bg-holder"}).find("div", {"class": "ranking-header"}) for i in bsData.findAll("div", {"class": "ranked-team standard-box"})]]]
-		
-		if (searchSpecific):
-			return data[searchSpecific-1]
+        data = [{"ranking": teamData[0][1:], "points": sub("[^0-9]", "", teamData[1].split("(")[1]), "team": teamData[1].split("(")[0],"roster": teamData[2:][:-1],"recent_change": teamData[-1]} for teamData in [list(filter(None, i.text.split("\n"))) for i in [i.find("div", {"class": "bg-holder"}).find("div", {"class": "ranking-header"}) for i in bsData.findAll("div", {"class": "ranked-team standard-box"})]]]
+        datetime.now()
+        if (searchSpecific):
+            return data[searchSpecific-1]
 
-		else:
-			return data
-	
-	def query(query):
-			
-			data, references = {}, ["players", "teams", "events"]
-			bsData = webWorker("https://www.hltv.org/search?query=" + query).findAll("table", {"class": "table"})
+        else:
+            return data
+    
+    def query(self, query):
+            
+            data, references = {}, ["players", "teams", "events"]
+            bsData = webWorker("https://www.hltv.org/search?query=" + query).findAll("table", {"class": "table"})
 
-			for i in range(3):
-				data[references[i]] = [{references[i][:-1]: list(filter(None, bsData[i].text.split("\n")))[1:][j], "hltv_id": [i.get("href").split("/")[-2] for i in bsData[i].findAll("a")][j]} for j in range(len(list(filter(None, bsData[i].text.split("\n")))[1:]))]
+            for i in range(3):
+                data[references[i]] = [{references[i][:-1]: list(filter(None, bsData[i].text.split("\n")))[1:][j], "hltv_id": [i.get("href").split("/")[-2] for i in bsData[i].findAll("a")][j]} for j in range(len(list(filter(None, bsData[i].text.split("\n")))[1:]))]
 
-			topics = [list(filter(None, bsData[3].text.split("\n")))[3:][i*3:i*3+3] for i in range(int(len(list(filter(None, bsData[3].text.split("\n")))[3:]) / 3))]
+            topics = [list(filter(None, bsData[3].text.split("\n")))[3:][i*3:i*3+3] for i in range(int(len(list(filter(None, bsData[3].text.split("\n")))[3:]) / 3))]
 
-			data["topics"] = [{"topic": topics[i][0],"date": topics[i][1], "forum": topics[i][2], "event_id": [i.get("href").split("/")[-2] for i in bsData[3].findAll("a")][i]} for i in range(len(topics))]
-			return data
+            data["topics"] = [{"topic": topics[i][0],"date": topics[i][1], "forum": topics[i][2], "event_id": [i.get("href").split("/")[-2] for i in bsData[3].findAll("a")][i]} for i in range(len(topics))]
+            return data
 
-	events = lambda: [{"event": event[0], "dates": event[1]} for event in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/events").findAll("div", {"class": "content standard-box"})]]
+    events = lambda: [{"event": event[0], "dates": event[1]} for event in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/events").findAll("div", {"class": "content standard-box"})]]
 
-	upcomingMatches = lambda: [{"time": matchDetails[0], "match": (' ').join(matchDetails[1:3]), "event": matchDetails[4], "map": mapResolver[matchDetails[5]]} for matchDetails in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"})]]
+    upcomingMatches = lambda: [{"time": matchDetails[0], "match": (' ').join(matchDetails[1:3]), "event": matchDetails[4], "map": mapResolver[matchDetails[5]]} for matchDetails in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"})]]
 
-	todaysResults = lambda: [{"team_one": match[0], "team_two": match[2], "score": match[1], "tournament": match[3], "map": mapResolver[match[4]]} for match in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/results?content=vod").find("div", {"class": "results-sublist"}).findAll("div", {"class": "result"})]]
+    todaysResults = lambda: [{"team_one": match[0], "team_two": match[2], "score": match[1], "tournament": match[3], "map": mapResolver[match[4]]} for match in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/results?content=vod").find("div", {"class": "results-sublist"}).findAll("div", {"class": "result"})]]
 
-class match:
+class match():
 
-	def score(matchID):
-		
-		bsData = webWorker(matchIdResolver(matchID)) # Cannot compress further without sending multiple requests
-		return {"winner_score": bsData.find("div", {"class": "won"}).text, "loser_score": bsData.find("div", {"class": "lost"}).text}
+    def odds(self, matchID):
 
-	def rewatch(matchID):
-		
-		bsData, data = webWorker(matchIdResolver(matchID)).findAll("div", {"class": "stream-box"}), {}
-		if (bsData[0].find("a").get("href").split("/")[-1] is not None):
-			
-			data["gotvId"] = bsData[0].find("a").get("href").split("/")[-1]
-			bsData = bsData[1:]
+        bsData = webWorker(matchIdResolver(matchID)) # Cannot compress further without sending multiple requests
+        for each in bsData.find("div", {"class": "betting"}):
+            print(each)
 
-		data["watch"] = [{"link": i.get("data-stream-embed"), "broadcast_title": i.find("span", {"class": "spoiler"}).text, "broadcast_country": i.find("img", {"class": "stream-flag flag"}).get("alt")} for i in bsData]
-		return data
 
-	def veto(matchID, keepLineBreaks=False):
-		
-		bsData = webWorker(matchIdResolver(matchID)) # Cannot be removed without sending 2x requests
+    def score(self, matchID):
+        
+        bsData = webWorker(matchIdResolver(matchID)) # Cannot compress further without sending multiple requests
+        return {"winner_score": bsData.find("div", {"class": "won"}).text, "loser_score": bsData.find("div", {"class": "lost"}).text}
 
-		if (keepLineBreaks):
-			return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text, "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text}
-		else:
-			return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text.replace('\n',' '), "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text.replace('\n',' ')}
+    def rewatch(self, matchID):
+        
+        bsData, data = webWorker(matchIdResolver(matchID)).findAll("div", {"class": "stream-box"}), {}
+        if (bsData[0].find("a").get("href").split("/")[-1] is not None):
+            
+            data["gotvId"] = bsData[0].find("a").get("href").split("/")[-1]
+            bsData = bsData[1:]
 
-	def playerScores(matchID):
-		# Declare All Initial Arrays
-		references, referenceKeys = ["collective"] + ["map_" + str(i) for i in range(9)], [["players", "players"], ["kd", "kd text-center"], ["adr", "adr text-center "], ["kast", "kast text-center"], ["rating", "rating text-center"]]
-		workingData, prettyData, moreData = {"players": [], "kd": [], "adr": [], "kast": [], "rating": []}, {"players": [], "kd": [], "kd_diff": [], "adr": [], "kast": [], "rating": []}, {"players": [], "kast": [], "kd": [], "kd_diff": [], "rating": []}
-		bsData, data = webWorker(matchIdResolver(matchID)), {"collective": {"players": []}}
-		
-		for i in range(len(referenceKeys)):
-			workingData[referenceKeys[i][0]] = [list(filter(None, i.text.split("\n"))) for i in bsData.findAll("td", {"class": referenceKeys[i][1]})]
+        data["watch"] = [{"link": i.get("data-stream-embed"), "broadcast_title": i.find("span", {"class": "spoiler"}).text, "broadcast_country": i.find("img", {"class": "stream-flag flag"}).get("alt")} for i in bsData]
+        return data
 
-		# It's like Data, Data, Data, Data, Data, Title, this removes the title
-		for i in range(len(workingData["players"])):
-			if (i % 6 != 0):
-				moreData["players"].append({
-					"player": workingData["players"][i][1],
-					"real_name": workingData["players"][i][0].split("'")[0] + workingData["players"][i][0].split("'")[2][1:]
-					})
+    def veto(self, matchID, keepLineBreaks=False):
+        
+        bsData = webWorker(matchIdResolver(matchID)) # Cannot be removed without sending 2x requests
 
-				moreData["kast"].append(workingData["kast"][i])
-				moreData["kd"].append(workingData["kd"][i])
-				moreData["rating"].append(workingData["rating"][i])
+        if (keepLineBreaks):
+            return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text, "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text}
+        else:
+            return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text.replace('\n',' '), "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text.replace('\n',' ')}
 
-		# Formats it neatly
-		for i in range(len(moreData["players"]) // 5):
-			prettyData["players"].append( moreData["players"][i*5:(i*5) + 5])
-			prettyData["kast"].append( moreData["kast"][i*5:(i*5) + 5])
-			prettyData["kd"].append( moreData["kd"][i*5:(i*5) + 5])
-			moreData["kd_diff"] = [eval(i) for i in array(moreData["kd"]).flat]
-			prettyData["kd_diff"].append(moreData["kd_diff"][i*5:(i*5) + 5])
-			prettyData["rating"].append( moreData["rating"][i*5:(i*5) + 5] )
-			prettyData["adr"].append( workingData["adr"][i*5:(i*5) + 5] ) # Complicated but adds in groups of 5 elements esssentially
+    def playerScores(self, matchID):
+        # Declare All Initial Arrays
+        references, referenceKeys = ["collective"] + ["map_" + str(i) for i in range(9)], [["players", "players"], ["kd", "kd text-center"], ["adr", "adr text-center "], ["kast", "kast text-center"], ["rating", "rating text-center"]]
+        workingData, prettyData, moreData = {"players": [], "kd": [], "adr": [], "kast": [], "rating": []}, {"players": [], "kd": [], "kd_diff": [], "adr": [], "kast": [], "rating": []}, {"players": [], "kast": [], "kd": [], "kd_diff": [], "rating": []}
+        bsData, data = webWorker(matchIdResolver(matchID)), {"collective": {"players": []}}
+        
+        for i in range(len(referenceKeys)):
+            workingData[referenceKeys[i][0]] = [list(filter(None, i.text.split("\n"))) for i in bsData.findAll("td", {"class": referenceKeys[i][1]})]
 
+        # It's like Data, Data, Data, Data, Data, Title, this removes the title
+        for i in range(len(workingData["players"])):
+            if (i % 6 != 0):
+                moreData["players"].append({
+                    "player": workingData["players"][i][1],
+                    "real_name": workingData["players"][i][0].split("'")[0] + workingData["players"][i][0].split("'")[2][1:]
+                    })
 
-		# Need to quickly get the map data to piece together the map data
-		maps = [i.text for i in bsData.findAll("div", {"class": "mapname"})] # Quicker than calling the function
+                moreData["kast"].append(workingData["kast"][i])
+                moreData["kd"].append(workingData["kd"][i])
+                moreData["rating"].append(workingData["rating"][i])
 
+        # Formats it neatly
+        for i in range(len(moreData["players"]) // 5):
+            prettyData["players"].append( moreData["players"][i*5:(i*5) + 5])
+            prettyData["kast"].append( moreData["kast"][i*5:(i*5) + 5])
+            prettyData["kd"].append( moreData["kd"][i*5:(i*5) + 5])
+            moreData["kd_diff"] = [eval(i) for i in array(moreData["kd"]).flat]
+            prettyData["kd_diff"].append(moreData["kd_diff"][i*5:(i*5) + 5])
+            prettyData["rating"].append( moreData["rating"][i*5:(i*5) + 5] )
+            prettyData["adr"].append( workingData["adr"][i*5:(i*5) + 5] ) # Complicated but adds in groups of 5 elements esssentially
 
 
-		# Assumes Each Found Set of 10 Players Equates to a Map -> Iterate Through Players and Add
-		for i in range( (len(prettyData)-1) //2 ):
+        # Need to quickly get the map data to piece together the map data
+        maps = [i.text for i in bsData.findAll("div", {"class": "mapname"})] # Quicker than calling the function
 
-			data["map_" + str(i)] = {"players": []}
-			data["map_" + str(i)]["map_name"] = maps[i]
 
-		# Processes and adds data in teams & players
-		for i in range(len(data)):
 
-			data[references[i]]["players"] = [{"real_name": prettyData["players"][(i*2) + j][k]["real_name"], "alias": prettyData["players"][(i*2) + j][k]["player"], "rating": ('').join(prettyData["rating"][(i*2) + j][k]), "kast": ('').join(prettyData["kast"][(i*2) + j][k]), "kd": ('').join(prettyData["kd"][(i*2) + j][k]), "kd_diff": prettyData["kd_diff"][(i*2) + j][k], "adr": ('').join(prettyData["adr"][(i*2) + j][k])} for k in range(5) for j in range(2)]
+        # Assumes Each Found Set of 10 Players Equates to a Map -> Iterate Through Players and Add
+        for i in range( (len(prettyData)-1) //2 ):
 
-		return data
-	
-	players = lambda matchID: {"players": [(''.join(i)) for i in list(filter(None, [list(filter(None, i.text.split("\n"))) for i in webWorker(matchIdResolver(matchID)).findAll("td", {"class": "player"})]))]}
+            data["map_" + str(i)] = {"players": []}
+            data["map_" + str(i)]["map_name"] = maps[i]
 
-	maps = lambda matchID: [i.text for i in webWorker(matchIdResolver(matchID)).findAll("div", {"class": "mapname"})]
+        # Processes and adds data in teams & players
+        for i in range(len(data)):
+
+            data[references[i]]["players"] = [{"real_name": prettyData["players"][(i*2) + j][k]["real_name"], "alias": prettyData["players"][(i*2) + j][k]["player"], "rating": ('').join(prettyData["rating"][(i*2) + j][k]), "kast": ('').join(prettyData["kast"][(i*2) + j][k]), "kd": ('').join(prettyData["kd"][(i*2) + j][k]), "kd_diff": prettyData["kd_diff"][(i*2) + j][k], "adr": ('').join(prettyData["adr"][(i*2) + j][k])} for k in range(5) for j in range(2)]
+
+        return data
+    
+    players = lambda matchID: {"players": [(''.join(i)) for i in list(filter(None, [list(filter(None, i.text.split("\n"))) for i in webWorker(matchIdResolver(matchID)).findAll("td", {"class": "player"})]))]}
+
+    maps = lambda matchID: [i.text for i in webWorker(matchIdResolver(matchID)).findAll("div", {"class": "mapname"})]
+
+
