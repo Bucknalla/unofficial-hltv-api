@@ -1,2 +1,6 @@
 .python-version
 .vscode/settings.json
+__pycache__
+bin
+lib
+include

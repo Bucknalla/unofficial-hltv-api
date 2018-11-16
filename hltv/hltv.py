@@ -316,14 +316,36 @@ class hltv(object):
 
     todaysResults = lambda: [{"team_one": match[0], "team_two": match[2], "score": match[1], "tournament": match[3], "map": mapResolver[match[4]]} for match in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/results?content=vod").find("div", {"class": "results-sublist"}).findAll("div", {"class": "result"})]]
 
-class match():
+class match(object):
+    def __init__(self, matchID):
+        self.matchID = matchID
+        pass
 
-    def odds(self, matchID):
+    def teams(self):
+        bsData = webWorker(matchIdResolver(self.matchID)) # Cannot compress further without sending multiple requests
+        team_1 = bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team1-gradient"}).find("div", {"class": "teamName"}).text
+        team_2 = bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team2-gradient"}).find("div", {"class": "teamName"}).text
+        return(team_1,team_2)
 
-        bsData = webWorker(matchIdResolver(matchID)) # Cannot compress further without sending multiple requests
-        for each in bsData.find("div", {"class": "betting"}):
-            print(each)
-
+    def odds(self):
+        bsData = webWorker(matchIdResolver(self.matchID)) # Cannot compress further without sending multiple requests
+        bet_table = bsData.find("div", {"class": "betting standard-box"})
+        bets = bet_table.findAll("tr", {"class": "betting_provider"})
+        bet_list = []
+        for index, _ in enumerate(bets):    
+            classes = bets[index].get("class")
+            if (any("geoprovider" in string for string in classes) and not "hidden" in classes):
+                if not "night" in classes:
+                    odds = bets[index].findAll("td", {"class" : "odds-cell border-left"})
+                    odd_holder = []
+                    for odd in odds:
+                        if(odd.text is not None):
+                            odd_holder.append(odd.text)
+                    indices = int([i for i, s in enumerate(classes) if 'geoprovider' in s][0])
+                    provider = classes[indices].split("_")[1]
+                    if odd_holder:
+                        bet_list.append((provider, odd_holder[0], odd_holder[2]))
+        return(bet_list)
 
     def score(self, matchID):
         
