@@ -310,10 +310,13 @@ class hltv(object):
             data["topics"] = [{"topic": topics[i][0],"date": topics[i][1], "forum": topics[i][2], "event_id": [i.get("href").split("/")[-2] for i in bsData[3].findAll("a")][i]} for i in range(len(topics))]
             return data
 
+    # def upcoming(self):
+    #     return webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"}, href=True)
+
     events = lambda: [{"event": event[0], "dates": event[1]} for event in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/events").findAll("div", {"class": "content standard-box"})]]
 
-    upcomingMatches = lambda: [{"time": matchDetails[0], "match": (' ').join(matchDetails[1:3]), "event": matchDetails[4], "map": mapResolver[matchDetails[5]]} for matchDetails in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"})]]
-
+    upcomingMatches = lambda: [{"time": matchDetails[0][0], "match": (' ').join(matchDetails[0][1:4]), "event": matchDetails[0][4], "map": mapResolver[matchDetails[0][5]], "match_id":matchDetails[1].split("/")[2], "match_url":("https://www.hltv.org"+matchDetails[1])} for matchDetails in [(list(filter(None, i.text.split("\n"))), i["href"]) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"}, href=True)]]
+    
     todaysResults = lambda: [{"team_one": match[0], "team_two": match[2], "score": match[1], "tournament": match[3], "map": mapResolver[match[4]]} for match in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/results?content=vod").find("div", {"class": "results-sublist"}).findAll("div", {"class": "result"})]]
 
 class match(object):

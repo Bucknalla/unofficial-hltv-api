@@ -1,8 +1,7 @@
 from hltv import hltv
+import pprint
 
-h = hltv.match("2329057")
+# h = hltv.hltv()
 
-# for odd in h.odds():
-#     if("betway" in odd):
-#         print(odd)
-print(h.odds())
+for odd in hltv.hltv.upcomingMatches():
+    pprint.pprint(odd)
