@@ -280,6 +280,9 @@ class player():
     achivements = lambda playerRequest: [trophy.get("title") for trophy in webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot").findAll("span", {"class": "trophyDescription"})]
 
 class hltv(object):
+    def __init__(self, matchID):
+        self.bsData_events = webWorker("https://www.hltv.org/events")
+        self.bsData_teams = webWorker("https://www.hltv.org/ranking/teams/") 
 
     def rankings(self, searchSpecific=False, customYear=datetime.now().year, customMonth=datetime.now().strftime("%B").lower(), customDay=datetime.now().day):
     # Slightly more complex, as the link is dynamic hence it is only updated live from the main site.
@@ -310,9 +313,6 @@ class hltv(object):
             data["topics"] = [{"topic": topics[i][0],"date": topics[i][1], "forum": topics[i][2], "event_id": [i.get("href").split("/")[-2] for i in bsData[3].findAll("a")][i]} for i in range(len(topics))]
             return data
 
-    # def upcoming(self):
-    #     return webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"}, href=True)
-
     events = lambda: [{"event": event[0], "dates": event[1]} for event in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/events").findAll("div", {"class": "content standard-box"})]]
 
     upcomingMatches = lambda: [{"time": matchDetails[0][0], "match": (' ').join(matchDetails[0][1:4]), "event": matchDetails[0][4], "map": mapResolver[matchDetails[0][5]], "match_id":matchDetails[1].split("/")[2], "match_url":("https://www.hltv.org"+matchDetails[1])} for matchDetails in [(list(filter(None, i.text.split("\n"))), i["href"]) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"}, href=True)]]
@@ -322,17 +322,20 @@ class hltv(object):
 class match(object):
     def __init__(self, matchID):
         self.matchID = matchID
+        self.bsData = webWorker(matchIdResolver(self.matchID))
+        self.players = lambda : {"players": [(''.join(i)) for i in list(filter(None, [list(filter(None, i.text.split("\n"))) for i in self.bsData.findAll("td", {"class": "player"})]))]}
+        self.maps = lambda : [i.text for i in self.bsData.findAll("div", {"class": "mapname"})]
         pass
 
     def teams(self):
-        bsData = webWorker(matchIdResolver(self.matchID)) # Cannot compress further without sending multiple requests
-        team_1 = bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team1-gradient"}).find("div", {"class": "teamName"}).text
-        team_2 = bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team2-gradient"}).find("div", {"class": "teamName"}).text
-        return(team_1,team_2)
+        team_1 = self.bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team1-gradient"}).find("div", {"class": "teamName"}).text
+        team_1_id = self.bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team1-gradient"}).find("a")["href"].split('/')[2]
+        team_2 = self.bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team2-gradient"}).find("div", {"class": "teamName"}).text
+        team_2_id = self.bsData.find("div", {"class": "standard-box teamsBox"}).find("div", {"class": "team2-gradient"}).find("a")["href"].split('/')[2]
+        return {"team_1":(team_1,team_1_id),"team_2":(team_2, team_2_id)}
 
     def odds(self):
-        bsData = webWorker(matchIdResolver(self.matchID)) # Cannot compress further without sending multiple requests
-        bet_table = bsData.find("div", {"class": "betting standard-box"})
+        bet_table = self.bsData.find("div", {"class": "betting standard-box"})
         bets = bet_table.findAll("tr", {"class": "betting_provider"})
         bet_list = []
         for index, _ in enumerate(bets):    
@@ -350,14 +353,11 @@ class match(object):
                         bet_list.append((provider, odd_holder[0], odd_holder[2]))
         return(bet_list)
 
-    def score(self, matchID):
-        
-        bsData = webWorker(matchIdResolver(matchID)) # Cannot compress further without sending multiple requests
-        return {"winner_score": bsData.find("div", {"class": "won"}).text, "loser_score": bsData.find("div", {"class": "lost"}).text}
+    def score(self):
+        return {"winner_score": self.bsData.find("div", {"class": "won"}).text, "loser_score": self.bsData.find("div", {"class": "lost"}).text}
 
-    def rewatch(self, matchID):
-        
-        bsData, data = webWorker(matchIdResolver(matchID)).findAll("div", {"class": "stream-box"}), {}
+    def rewatch(self):
+        bsData, data = self.bsData.findAll("div", {"class": "stream-box"}), {}
         if (bsData[0].find("a").get("href").split("/")[-1] is not None):
             
             data["gotvId"] = bsData[0].find("a").get("href").split("/")[-1]
@@ -366,20 +366,17 @@ class match(object):
         data["watch"] = [{"link": i.get("data-stream-embed"), "broadcast_title": i.find("span", {"class": "spoiler"}).text, "broadcast_country": i.find("img", {"class": "stream-flag flag"}).get("alt")} for i in bsData]
         return data
 
-    def veto(self, matchID, keepLineBreaks=False):
-        
-        bsData = webWorker(matchIdResolver(matchID)) # Cannot be removed without sending 2x requests
-
+    def veto(self, keepLineBreaks=False):
         if (keepLineBreaks):
-            return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text, "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text}
+            return {"veto_details": self.bsData.findAll("div", {"class": "standard-box veto-box"})[0].text, "veto": self.bsData.findAll("div", {"class": "standard-box veto-box"})[1].text}
         else:
-            return {"veto_details": bsData.findAll("div", {"class": "standard-box veto-box"})[0].text.replace('\n',' '), "veto": bsData.findAll("div", {"class": "standard-box veto-box"})[1].text.replace('\n',' ')}
+            return {"veto_details": self.bsData.findAll("div", {"class": "standard-box veto-box"})[0].text.replace('\n',' '), "veto": self.bsData.findAll("div", {"class": "standard-box veto-box"})[1].text.replace('\n',' ')}
 
-    def playerScores(self, matchID):
+    def playerScores(self):
         # Declare All Initial Arrays
         references, referenceKeys = ["collective"] + ["map_" + str(i) for i in range(9)], [["players", "players"], ["kd", "kd text-center"], ["adr", "adr text-center "], ["kast", "kast text-center"], ["rating", "rating text-center"]]
         workingData, prettyData, moreData = {"players": [], "kd": [], "adr": [], "kast": [], "rating": []}, {"players": [], "kd": [], "kd_diff": [], "adr": [], "kast": [], "rating": []}, {"players": [], "kast": [], "kd": [], "kd_diff": [], "rating": []}
-        bsData, data = webWorker(matchIdResolver(matchID)), {"collective": {"players": []}}
+        bsData, data = self.bsData, {"collective": {"players": []}}
         
         for i in range(len(referenceKeys)):
             workingData[referenceKeys[i][0]] = [list(filter(None, i.text.split("\n"))) for i in bsData.findAll("td", {"class": referenceKeys[i][1]})]
@@ -410,8 +407,6 @@ class match(object):
         # Need to quickly get the map data to piece together the map data
         maps = [i.text for i in bsData.findAll("div", {"class": "mapname"})] # Quicker than calling the function
 
-
-
         # Assumes Each Found Set of 10 Players Equates to a Map -> Iterate Through Players and Add
         for i in range( (len(prettyData)-1) //2 ):
 
@@ -425,8 +420,4 @@ class match(object):
 
         return data
     
-    players = lambda matchID: {"players": [(''.join(i)) for i in list(filter(None, [list(filter(None, i.text.split("\n"))) for i in webWorker(matchIdResolver(matchID)).findAll("td", {"class": "player"})]))]}
-
-    maps = lambda matchID: [i.text for i in webWorker(matchIdResolver(matchID)).findAll("div", {"class": "mapname"})]
-
-
+  
