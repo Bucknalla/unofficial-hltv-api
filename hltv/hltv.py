@@ -280,9 +280,10 @@ class player():
     achivements = lambda playerRequest: [trophy.get("title") for trophy in webWorker("https://www.hltv.org/player/" + getId(playerRequest) + "/bot").findAll("span", {"class": "trophyDescription"})]
 
 class hltv(object):
-    def __init__(self, matchID):
+    def __init__(self):
         self.bsData_events = webWorker("https://www.hltv.org/events")
         self.bsData_teams = webWorker("https://www.hltv.org/ranking/teams/") 
+        self.bsData_matches = webWorker("https://www.hltv.org/matches") 
 
     def rankings(self, searchSpecific=False, customYear=datetime.now().year, customMonth=datetime.now().strftime("%B").lower(), customDay=datetime.now().day):
     # Slightly more complex, as the link is dynamic hence it is only updated live from the main site.
@@ -302,20 +303,43 @@ class hltv(object):
     
     def query(self, query):
             
-            data, references = {}, ["players", "teams", "events"]
-            bsData = webWorker("https://www.hltv.org/search?query=" + query).findAll("table", {"class": "table"})
+        data, references = {}, ["players", "teams", "events"]
+        bsData = webWorker("https://www.hltv.org/search?query=" + query).findAll("table", {"class": "table"})
 
-            for i in range(3):
-                data[references[i]] = [{references[i][:-1]: list(filter(None, bsData[i].text.split("\n")))[1:][j], "hltv_id": [i.get("href").split("/")[-2] for i in bsData[i].findAll("a")][j]} for j in range(len(list(filter(None, bsData[i].text.split("\n")))[1:]))]
+        for i in range(3):
+            data[references[i]] = [{references[i][:-1]: list(filter(None, bsData[i].text.split("\n")))[1:][j], "hltv_id": [i.get("href").split("/")[-2] for i in bsData[i].findAll("a")][j]} for j in range(len(list(filter(None, bsData[i].text.split("\n")))[1:]))]
 
-            topics = [list(filter(None, bsData[3].text.split("\n")))[3:][i*3:i*3+3] for i in range(int(len(list(filter(None, bsData[3].text.split("\n")))[3:]) / 3))]
+        topics = [list(filter(None, bsData[3].text.split("\n")))[3:][i*3:i*3+3] for i in range(int(len(list(filter(None, bsData[3].text.split("\n")))[3:]) / 3))]
 
-            data["topics"] = [{"topic": topics[i][0],"date": topics[i][1], "forum": topics[i][2], "event_id": [i.get("href").split("/")[-2] for i in bsData[3].findAll("a")][i]} for i in range(len(topics))]
-            return data
+        data["topics"] = [{"topic": topics[i][0],"date": topics[i][1], "forum": topics[i][2], "event_id": [i.get("href").split("/")[-2] for i in bsData[3].findAll("a")][i]}        for i in range(len(topics))]
+        return data
 
     events = lambda: [{"event": event[0], "dates": event[1]} for event in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/events").findAll("div", {"class": "content standard-box"})]]
 
-    upcomingMatches = lambda: [{"time": matchDetails[0][0], "match": (' ').join(matchDetails[0][1:4]), "event": matchDetails[0][4], "map": mapResolver[matchDetails[0][5]], "match_id":matchDetails[1].split("/")[2], "match_url":("https://www.hltv.org"+matchDetails[1])} for matchDetails in [(list(filter(None, i.text.split("\n"))), i["href"]) for i in webWorker("https://www.hltv.org/matches").find("div", {"class": "match-day"}).findAll("a", {"class": "a-reset block upcoming-match standard-box"}, href=True)]]
+    def upcomingMatches(self):
+        matches = self.bsData_matches.findAll("div", {"class": "match-day"})
+        match_list = []
+        for match in matches:
+            for match_details in match.findAll("a", {"class": "a-reset block upcoming-match standard-box"}, href=True):
+                print("Next Match")
+                match_obj = {}
+                try:
+                    match_obj["timestamp"] = match_details.find("div", {"class": "time"})["data-unix"]
+                    for number, team in enumerate(match_details.findAll("td", {"class": "team-cell"})):
+                        match_obj["team_"+str(number)] = team.text.strip()
+                    match_obj["url"] = "https://www.hltv.org{}".format(match_details["href"])
+                    match_obj["id"] = match_obj["url"].split("/")[4]
+                    match_obj["event"] = match_details.span.text
+                    match_obj["best-of"] = match_details.find("div", {"class":"map-text"}).text
+                    match_obj["status"] = True
+                except:
+                    print("Event details missing...")
+                    match_obj["event"] = match_details.find("td", {"class": "placeholder-text-cell"}).text
+                    match_obj["status"] = False
+                    pass
+                print(match_obj)
+                match_list.append(match_obj)
+        return(match_list)   
     
     todaysResults = lambda: [{"team_one": match[0], "team_two": match[2], "score": match[1], "tournament": match[3], "map": mapResolver[match[4]]} for match in [list(filter(None, i.text.split("\n"))) for i in webWorker("https://www.hltv.org/results?content=vod").find("div", {"class": "results-sublist"}).findAll("div", {"class": "result"})]]
 
